@@ -50,7 +50,8 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Experience/Heal dots fly to player when in range
   - [x] Neon blue experience bar (bottom center)
   - [x] Level up mechanic with increasing requirements
-  - [x] Choice-based upgrade system (+1 Attack, +1 Damage)
+  - [x] Choice-based upgrade system (+1 Attack, +1 Damage, Circling Ball)
+  - [x] Circling Ball Upgrade: Orbitals rotate at 3/4 range, dealing 1 damage on contact. Multiple upgrades add more balls (equally distributed).
 - [x] Game Flow & UI
   - [x] Start Screen with Highscores
   - [x] Pause functionality (SPACE key)

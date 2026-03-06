@@ -49,6 +49,13 @@ export const CONSTANTS = {
         COLOR: '#00d2ff',
         LIFE: 100
     },
+    ORBITAL: {
+        SIZE: 8,
+        COLOR: '#00d2ff',
+        ROTATION_SPEED: 0.03, // Radians per frame
+        RANGE_FACTOR: 0.75, // 3/4 of player range
+        DAMAGE: 1
+    },
     EXPERIENCE: {
         SIZE: 3,
         COLOR: '#00d2ff',

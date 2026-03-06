@@ -42,6 +42,7 @@ class GameEngine {
         this.lastSpawnTime = 0;
         this.lastBossSpawnTime = Date.now();
         this.lastAttackTime = 0;
+        this.orbitalAngle = 0;
         this.gameRunning = false;
         this.isPaused = false;
         this.pendingUpgrades = 0;
@@ -152,6 +153,17 @@ class GameEngine {
             ctx.arc(cx, cy, CONSTANTS.HEAL.SIZE, 0, Math.PI * 2);
             ctx.fill();
         });
+
+        // Orbital Sprite
+        const oSize = (CONSTANTS.ORBITAL.SIZE + padding) * 2;
+        this.sprites.preRender('orbital', oSize, oSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.ORBITAL.COLOR;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONSTANTS.ORBITAL.COLOR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.ORBITAL.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
 
     applyUpgrade(type) {
@@ -159,6 +171,8 @@ class GameEngine {
             this.player.numProjectiles++;
         } else if (type === 'damage') {
             this.player.projectileDamage++;
+        } else if (type === 'orbital') {
+            this.player.numOrbitals++;
         }
 
         this.pendingUpgrades--;
@@ -315,6 +329,42 @@ class GameEngine {
 
         this.handleAutoAttack();
         this.spawnEnemy();
+
+        // Update Orbitals
+        if (this.player.numOrbitals > 0) {
+            this.orbitalAngle += CONSTANTS.ORBITAL.ROTATION_SPEED;
+            const orbitRadius = this.player.range * CONSTANTS.ORBITAL.RANGE_FACTOR;
+            
+            for (let i = 0; i < this.player.numOrbitals; i++) {
+                const angle = this.orbitalAngle + (i * (Math.PI * 2) / this.player.numOrbitals);
+                const ox = this.player.x + Math.cos(angle) * orbitRadius;
+                const oy = this.player.y + Math.sin(angle) * orbitRadius;
+
+                // Collision with enemies
+                const nearby = this.grid.getNearby(ox, oy);
+                const orbSizeSq = (CONSTANTS.ORBITAL.SIZE / 2 + CONSTANTS.ENEMY.SIZE / 2) ** 2;
+
+                nearby.forEach(enemy => {
+                    const dx = ox - enemy.x;
+                    const dy = oy - enemy.y;
+                    if (dx * dx + dy * dy < orbSizeSq) {
+                        enemy.health -= CONSTANTS.ORBITAL.DAMAGE;
+                        if (enemy.health <= 0) {
+                            if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
+                                this.healDots.push(new HealDot(enemy.x, enemy.y));
+                            } else {
+                                const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
+                                for (let j = 0; j < dots; j++) {
+                                    const oxDot = (Math.random() - 0.5) * 30;
+                                    const oyDot = (Math.random() - 0.5) * 30;
+                                    this.experienceDots.push(new ExperienceDot(enemy.x + oxDot, enemy.y + oyDot, 1));
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
 
         // Spatial Grid Update
         this.grid.clear();
@@ -547,6 +597,21 @@ class GameEngine {
         });
         
         this.player.draw(this.ctx, this.centerX, this.centerY, vSize, vSize, this.sprites.get('player'));
+        
+        // Render Orbitals
+        if (this.player.numOrbitals > 0) {
+            const orbitRadius = this.player.range * CONSTANTS.ORBITAL.RANGE_FACTOR;
+            const orbitalSprite = this.sprites.get('orbital');
+            const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+            
+            for (let i = 0; i < this.player.numOrbitals; i++) {
+                const angle = this.orbitalAngle + (i * (Math.PI * 2) / this.player.numOrbitals);
+                const ox = Math.cos(angle) * orbitRadius + this.centerX;
+                const oy = Math.sin(angle) * orbitRadius + this.centerY;
+                
+                this.ctx.drawImage(orbitalSprite, ox - CONSTANTS.ORBITAL.SIZE / 2 - padding, oy - CONSTANTS.ORBITAL.SIZE / 2 - padding);
+            }
+        }
         
         this.enemies.forEach(e => {
             if (isVisible(e)) {
