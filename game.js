@@ -14,8 +14,8 @@ let lastSpawnTime = 0;
 const spawnInterval = 500; // ms
 
 // Constants for Movement & Acceleration
-const MAX_SPEED = 3;
-const MIN_SPEED = 0.5;
+const MAX_SPEED = 2.2;
+const MIN_SPEED = 0.4;
 const MAX_ACCEL_DIST = 500;
 const PLAYER_RADIUS = 20;
 
@@ -23,6 +23,20 @@ const PLAYER_RADIUS = 20;
 let playerX = 0;
 let playerY = 0;
 const PLAYER_SPEED = 5;
+
+// Starfield (Background dots)
+const stars = [];
+const STAR_COUNT = 200;
+const WORLD_SIZE = 2000; // Size of the area stars are distributed in
+
+for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+        x: (Math.random() - 0.5) * WORLD_SIZE,
+        y: (Math.random() - 0.5) * WORLD_SIZE,
+        size: Math.random() * 2,
+        opacity: 0.2 + Math.random() * 0.5
+    });
+}
 
 // Input Handling
 const keys = {};
@@ -154,6 +168,27 @@ const render = () => {
     // Background
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
+
+    // Render Stars (Infinite field using modulo wrapping)
+    ctx.fillStyle = '#666';
+    stars.forEach(star => {
+        // Calculate screen position with wrapping
+        let sx = (star.x - playerX + centerX) % WORLD_SIZE;
+        let sy = (star.y - playerY + centerY) % WORLD_SIZE;
+        
+        // Ensure positive coordinates for modulo
+        if (sx < 0) sx += WORLD_SIZE;
+        if (sy < 0) sy += WORLD_SIZE;
+        
+        // Draw only if on screen (with a small buffer)
+        if (sx < width && sy < height) {
+            ctx.globalAlpha = star.opacity;
+            ctx.beginPath();
+            ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    });
+    ctx.globalAlpha = 1.0;
 
     drawPlayer();
     enemies.forEach(enemy => enemy.draw());
