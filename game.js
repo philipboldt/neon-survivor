@@ -64,9 +64,12 @@ class GameEngine {
         this.keys[e.code] = true;
 
         if (e.code === 'Space') {
-            if (!this.gameRunning && !this.ui.els.startScreen.classList.contains('hidden')) {
-                this.startGame();
-            } else if (this.gameRunning) {
+            if (!this.gameRunning) {
+                if (!this.ui.els.startScreen.classList.contains('hidden') || 
+                    !this.ui.els.gameOverScreen.classList.contains('hidden')) {
+                    this.startGame();
+                }
+            } else {
                 this.isPaused = !this.isPaused;
                 this.ui.togglePause(this.isPaused);
             }
