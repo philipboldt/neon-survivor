@@ -4,6 +4,10 @@ A functional game prototype where the player survives against waves of enemies i
 
 ## Current Status
 - [x] Initial Project Setup
+- [x] Code Refactoring & Modularization
+  - [x] Extracted classes (`Player`, `Enemy`, `Projectile`)
+  - [x] Centralized configuration (`config.js`)
+  - [x] Game Engine for state and loop management
 - [x] Fullscreen Canvas & Rendering
 - [x] Player Movement & World Shift
   - [x] Player fixed in center of the screen
