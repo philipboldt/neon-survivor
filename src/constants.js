@@ -18,6 +18,11 @@ export const CONSTANTS = {
             HEIGHT: 15,
             COLOR: '#00d2ff', // Neon Blue
             BG_COLOR: '#222'
+        },
+        UPGRADES: {
+            WIDTH: 400,
+            HEIGHT: 300,
+            COLOR: '#00d2ff'
         }
     },
     ENEMY: {

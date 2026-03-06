@@ -9,7 +9,9 @@ export class UIManager {
             finalLevel: document.getElementById('final-level'),
             restartBtn: document.getElementById('restart-btn'),
             startHighscores: document.getElementById('start-highscore-list'),
-            endHighscores: document.getElementById('end-highscore-list')
+            endHighscores: document.getElementById('end-highscore-list'),
+            upgradeScreen: document.getElementById('upgrade-screen'),
+            upgradeBtns: document.querySelectorAll('.upgrade-btn')
         };
         this.updateHighScores();
     }
@@ -18,6 +20,7 @@ export class UIManager {
         this.els.startScreen.classList.remove('hidden');
         this.els.pauseScreen.classList.add('hidden');
         this.els.gameOverScreen.classList.add('hidden');
+        this.els.upgradeScreen.classList.add('hidden');
         this.updateHighScores();
     }
 
@@ -25,11 +28,20 @@ export class UIManager {
         this.els.gameOverScreen.classList.remove('hidden');
         this.els.startScreen.classList.add('hidden');
         this.els.pauseScreen.classList.add('hidden');
+        this.els.upgradeScreen.classList.add('hidden');
         
         this.els.finalTime.textContent = stats.time;
         this.els.finalLevel.textContent = stats.level;
         
         this.updateHighScores(stats.time); // Using time as "score" for now
+    }
+
+    showUpgradeScreen() {
+        this.els.upgradeScreen.classList.remove('hidden');
+    }
+
+    hideUpgradeScreen() {
+        this.els.upgradeScreen.classList.add('hidden');
     }
 
     togglePause(isPaused) {
@@ -44,6 +56,7 @@ export class UIManager {
         this.els.startScreen.classList.add('hidden');
         this.els.pauseScreen.classList.add('hidden');
         this.els.gameOverScreen.classList.add('hidden');
+        this.els.upgradeScreen.classList.add('hidden');
     }
 
     updateTime(seconds) {

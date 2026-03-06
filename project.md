@@ -37,14 +37,15 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] 15 HP for player
   - [x] Neon green health bar (top center)
   - [x] Melee damage from enemies (1 damage per second)
-
 - [x] Experience & Leveling
   - [x] Enemies drop neon blue experience dots on death
   - [x] Player has a collection range (visualized with dark blue circle)
   - [x] Experience dots fly to player when in range
   - [x] Neon blue experience bar (bottom center)
   - [x] Level up mechanic with increasing requirements
+  - [x] Choice-based upgrade system (+1 Attack, +1 Damage)
 
+## Tech Stack
 - [x] Game Flow & UI
   - [x] Start Screen with Highscores
   - [x] Pause functionality (SPACE key)

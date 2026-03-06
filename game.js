@@ -34,6 +34,7 @@ class GameEngine {
         this.lastAttackTime = 0;
         this.gameRunning = false;
         this.isPaused = false;
+        this.pendingUpgrades = 0;
         
         this.player = new Player(); // Reset player stats
         this.generateStars();
@@ -60,9 +61,32 @@ class GameEngine {
             this.ui.els.restartBtn.addEventListener('click', () => this.startGame());
         }
 
+        // Upgrade Buttons
+        this.ui.els.upgradeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.getAttribute('data-type');
+                this.applyUpgrade(type);
+            });
+        });
+
         this.resize();
         this.ui.showStartScreen();
         this.loop();
+    }
+
+    applyUpgrade(type) {
+        if (type === 'attack') {
+            this.player.numProjectiles++;
+        } else if (type === 'damage') {
+            this.player.projectileDamage++;
+        }
+
+        this.pendingUpgrades--;
+        if (this.pendingUpgrades <= 0) {
+            this.pendingUpgrades = 0;
+            this.isPaused = false;
+            this.ui.hideUpgradeScreen();
+        }
     }
 
     startGame() {
@@ -81,7 +105,7 @@ class GameEngine {
                     !this.ui.els.gameOverScreen.classList.contains('hidden')) {
                     this.startGame();
                 }
-            } else {
+            } else if (this.pendingUpgrades === 0) {
                 this.isPaused = !this.isPaused;
                 this.ui.togglePause(this.isPaused);
             }
@@ -118,21 +142,24 @@ class GameEngine {
     handleAutoAttack() {
         const now = Date.now();
         if (now - this.lastAttackTime > this.player.cooldown) {
-            let nearestEnemy = null;
-            let minDist = this.player.range;
+            // Find enemies in range
+            const enemiesInRange = this.enemies
+                .map(enemy => {
+                    const dx = enemy.x - this.player.x;
+                    const dy = enemy.y - this.player.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    return { enemy, dist };
+                })
+                .filter(item => item.dist < this.player.range)
+                .sort((a, b) => a.dist - b.dist);
 
-            this.enemies.forEach(enemy => {
-                const dx = enemy.x - this.player.x;
-                const dy = enemy.y - this.player.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < minDist) {
-                    minDist = dist;
-                    nearestEnemy = enemy;
+            if (enemiesInRange.length > 0) {
+                // Shoot at multiple targets if available
+                const shots = Math.min(this.player.numProjectiles, enemiesInRange.length);
+                for (let i = 0; i < shots; i++) {
+                    const target = enemiesInRange[i].enemy;
+                    this.projectiles.push(new Projectile(this.player.x, this.player.y, target.x, target.y));
                 }
-            });
-
-            if (nearestEnemy) {
-                this.projectiles.push(new Projectile(this.player.x, this.player.y, nearestEnemy.x, nearestEnemy.y));
                 this.lastAttackTime = now;
             }
         }
@@ -157,7 +184,7 @@ class GameEngine {
                 const dy = p.y - enemy.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < enemy.size / 2 + p.size) {
-                    enemy.health -= 1;
+                    enemy.health -= this.player.projectileDamage;
                     p.life = 0;
                     if (enemy.health <= 0) {
                         this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1));
@@ -176,7 +203,12 @@ class GameEngine {
             const dist = Math.sqrt(dx * dx + dy * dy);
             
             if (dist < this.player.radius) {
-                this.player.gainExperience(dot.value);
+                const leveledUp = this.player.gainExperience(dot.value);
+                if (leveledUp) {
+                    this.pendingUpgrades++;
+                    this.isPaused = true;
+                    this.ui.showUpgradeScreen();
+                }
                 this.experienceDots.splice(index, 1);
             }
         });

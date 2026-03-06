@@ -16,6 +16,9 @@ export class Player {
         this.experience = 0;
         this.experienceToNextLevel = 10;
         this.level = 1;
+
+        this.numProjectiles = 1;
+        this.projectileDamage = 1;
     }
 
     update(keys) {
@@ -38,7 +41,9 @@ export class Player {
         this.experience += amount;
         if (this.experience >= this.experienceToNextLevel) {
             this.levelUp();
+            return true; // Leveled up
         }
+        return false;
     }
 
     levelUp() {
