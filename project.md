@@ -20,7 +20,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Dynamic Spawn Rate: Decreases spawn interval every 15 seconds (increases difficulty)
   - [x] Mini Boss: Spawns every 45 seconds (10 HP, 3 damage, larger size, drops 10 EXP) - First boss after 45s.
   - [x] UI Notification for Mini Boss spawn (fade in/out)
-  - [x] Boxes: 4 stationary neon brown boxes spawn in each quarter with mini boss. (3 HP, drop Magnet or Gold)
+  - [x] Boxes: Stationary neon brown boxes spawn in each quarter with mini boss. (3 HP, drop Magnet or Gold). Max 4 boxes total on map (only spawns in unoccupied quarters).
   - [x] Move towards player's world position
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)
 - [x] Visuals

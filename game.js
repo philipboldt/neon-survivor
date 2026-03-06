@@ -329,11 +329,24 @@ class GameEngine {
             this.lastBossSpawnTime = now;
             this.ui.showBossNotification();
 
-            // Spawn 4 boxes in each quarter
-            this.boxes.push(new Box(-1500, -1500));
-            this.boxes.push(new Box(1500, -1500));
-            this.boxes.push(new Box(-1500, 1500));
-            this.boxes.push(new Box(1500, 1500));
+            // Spawn up to 4 boxes, one in each quarter if unoccupied
+            const spawnPositions = [
+                { x: -1500, y: -1500 },
+                { x: 1500, y: -1500 },
+                { x: -1500, y: 1500 },
+                { x: 1500, y: 1500 }
+            ];
+
+            spawnPositions.forEach(pos => {
+                // Check if a box already exists near this position
+                const alreadyExists = this.boxes.some(b => 
+                    Math.abs(b.x - pos.x) < 100 && Math.abs(b.y - pos.y) < 100
+                );
+                
+                if (!alreadyExists && this.boxes.length < CONSTANTS.BOX.MAX_COUNT) {
+                    this.boxes.push(new Box(pos.x, pos.y));
+                }
+            });
         }
 
         const currentInterval = Math.max(100, CONSTANTS.ENEMY.SPAWN_INTERVAL - Math.floor(survivalTime / 15) * 50);

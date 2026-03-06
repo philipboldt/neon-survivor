@@ -51,7 +51,8 @@ export const CONSTANTS = {
         SIZE: 30,
         HEALTH: 3,
         COLOR: '#8B4513',
-        GLOW: '#CD853F'
+        GLOW: '#CD853F',
+        MAX_COUNT: 4
     },
     PROJECTILE: {
         SPEED: 7,
