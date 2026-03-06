@@ -166,6 +166,11 @@ class GameEngine {
     }
 
     handleKeyDown(e) {
+        if (this.ui.nameInputActive) {
+            this.ui.handleNameInputKey(e);
+            return;
+        }
+
         this.keys[e.code] = true;
 
         if (e.code === 'Space') {

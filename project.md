@@ -48,7 +48,8 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Start Screen with Highscores
   - [x] Pause functionality (SPACE key)
   - [x] Game Over screen with stats and restart
-  - [x] Highscore logic (Local Storage)
+  - [x] Highscore logic (Local Storage) with 3-letter name entry
+  - [x] Arcade-style character selection UI for highscores
 - [x] Performance Optimizations
   - [x] Sprite Pre-rendering (offscreen canvases for neon glow)
   - [x] Squared Distance calculations (avoiding `Math.sqrt`)

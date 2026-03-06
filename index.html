@@ -121,6 +121,58 @@
             color: #00d2ff;
             font-weight: bold;
         }
+
+        /* Arcade Name Input */
+        .arcade-input {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .char-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .char {
+            font-size: 3rem;
+            font-weight: bold;
+            width: 4rem;
+            text-align: center;
+            border-bottom: 3px solid #333;
+            padding-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .char.active {
+            border-bottom-color: #00d2ff;
+            color: #00d2ff;
+            text-shadow: 0 0 10px #00d2ff;
+        }
+
+        .touch-arrow {
+            background: none;
+            border: 1px solid #333;
+            color: #666;
+            font-size: 1.5rem;
+            padding: 0.2rem 1rem;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .touch-arrow:hover {
+            color: #00d2ff;
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+        }
+
+        .small {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -141,6 +193,30 @@
 
         <div id="game-over-screen" class="overlay hidden">
             <h1 class="neon-text red">GAME OVER</h1>
+            
+            <div id="name-input-container" class="hidden">
+                <h3>NEW HIGH SCORE!</h3>
+                <div class="arcade-input">
+                    <div class="char-col">
+                        <button class="touch-arrow up" data-dir="up" data-index="0">▲</button>
+                        <span class="char active" data-index="0">A</span>
+                        <button class="touch-arrow down" data-dir="down" data-index="0">▼</button>
+                    </div>
+                    <div class="char-col">
+                        <button class="touch-arrow up" data-dir="up" data-index="1">▲</button>
+                        <span class="char" data-index="1">A</span>
+                        <button class="touch-arrow down" data-dir="down" data-index="1">▼</button>
+                    </div>
+                    <div class="char-col">
+                        <button class="touch-arrow up" data-dir="up" data-index="2">▲</button>
+                        <span class="char" data-index="2">A</span>
+                        <button class="touch-arrow down" data-dir="down" data-index="2">▼</button>
+                    </div>
+                </div>
+                <button id="save-name" class="upgrade-btn">SAVE NAME</button>
+                <p class="small">ARROWS to change · ENTER to save</p>
+            </div>
+
             <div id="final-stats">
                 <p>Time Survived: <span id="final-time">0</span>s</p>
                 <p>Level Reached: <span id="final-level">1</span></p>
