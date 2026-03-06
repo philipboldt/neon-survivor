@@ -3,12 +3,13 @@ import { Player } from './src/Player.js';
 import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
 import { ExperienceDot } from './src/ExperienceDot.js';
+import { UIManager } from './src/UIManager.js';
 
 class GameEngine {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
-        this.timeDisplay = document.getElementById('time');
+        this.ui = new UIManager();
 
         this.width = 0;
         this.height = 0;
@@ -16,6 +17,13 @@ class GameEngine {
         this.centerY = 0;
 
         this.player = new Player();
+        this.resetGameState();
+        
+        this.keys = {};
+        this.init();
+    }
+
+    resetGameState() {
         this.enemies = [];
         this.projectiles = [];
         this.experienceDots = [];
@@ -24,19 +32,45 @@ class GameEngine {
         this.startTime = Date.now();
         this.lastSpawnTime = 0;
         this.lastAttackTime = 0;
-        this.keys = {};
-
-        this.init();
+        this.gameRunning = false;
+        this.isPaused = false;
+        
+        this.player = new Player(); // Reset player stats
+        this.generateStars();
     }
 
     init() {
         window.addEventListener('resize', () => this.resize());
-        window.addEventListener('keydown', (e) => this.keys[e.code] = true);
+        window.addEventListener('keydown', (e) => this.handleKeyDown(e));
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
 
-        this.generateStars();
+        if (this.ui.els.restartBtn) {
+            this.ui.els.restartBtn.addEventListener('click', () => this.startGame());
+        }
+
         this.resize();
+        this.ui.showStartScreen();
         this.loop();
+    }
+
+    startGame() {
+        this.resetGameState();
+        this.gameRunning = true;
+        this.ui.hideAll();
+        this.startTime = Date.now();
+    }
+
+    handleKeyDown(e) {
+        this.keys[e.code] = true;
+
+        if (e.code === 'Space' && !this.gameRunning && !this.ui.els.startScreen.classList.contains('hidden')) {
+            this.startGame();
+        }
+
+        if (e.code === 'KeyP' && this.gameRunning) {
+            this.isPaused = !this.isPaused;
+            this.ui.togglePause(this.isPaused);
+        }
     }
 
     generateStars() {
@@ -90,6 +124,8 @@ class GameEngine {
     }
 
     update() {
+        if (!this.gameRunning || this.isPaused) return;
+
         this.player.update(this.keys);
         this.handleAutoAttack();
         this.spawnEnemy();
@@ -109,7 +145,7 @@ class GameEngine {
                     enemy.health -= 1;
                     p.life = 0;
                     if (enemy.health <= 0) {
-                        this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1)); // 1 exp for start
+                        this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1));
                     }
                 }
             });
@@ -149,7 +185,6 @@ class GameEngine {
                 enemy.x = this.player.x + ((enemy.x - this.player.x) / pDist) * minPDist;
                 enemy.y = this.player.y + ((enemy.y - this.player.y) / pDist) * minPDist;
 
-                // Melee Damage
                 const now = Date.now();
                 if (!enemy.lastAttackTime) enemy.lastAttackTime = 0;
                 if (now - enemy.lastAttackTime > CONSTANTS.ENEMY.ATTACK_COOLDOWN) {
@@ -179,7 +214,16 @@ class GameEngine {
             }
         }
 
-        this.timeDisplay.innerText = Math.floor((Date.now() - this.startTime) / 1000);
+        const survivalTime = Math.floor((Date.now() - this.startTime) / 1000);
+        this.ui.updateTime(survivalTime);
+
+        if (this.player.health <= 0) {
+            this.gameRunning = false;
+            this.ui.showGameOver({
+                time: survivalTime,
+                level: this.player.level
+            });
+        }
     }
 
     render() {

@@ -13,27 +13,150 @@
             height: 100%;
             overflow: hidden;
             background-color: #000;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
         }
 
         canvas {
             display: block;
         }
 
-        #ui {
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .neon-text {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            color: #00d2ff;
+            text-shadow: 0 0 10px #00d2ff, 0 0 20px #00d2ff;
+            letter-spacing: 0.2em;
+        }
+
+        .neon-text.red {
+            color: #ff003c;
+            text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c;
+        }
+
+        .highscore-container {
+            margin-bottom: 2rem;
+            background: rgba(0, 210, 255, 0.05);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            padding: 1.5rem 3rem;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.1);
+        }
+
+        .highscore-list {
+            list-style: none;
+            padding: 0;
+            font-size: 1.2rem;
+            line-height: 2;
+        }
+
+        .highscore-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .blink {
+            animation: pulse 1.5s ease-in-out infinite;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid #00d2ff;
+            color: #00d2ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            letter-spacing: 0.2em;
+            transition: all 0.2s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: #00d2ff;
+            color: #000;
+            box-shadow: 0 0 20px #00d2ff;
+        }
+
+        #hud {
             position: absolute;
             top: 20px;
             left: 20px;
-            color: #fff;
-            font-family: 'Orbitron', sans-serif;
             pointer-events: none;
-            text-shadow: 0 0 5px #fff;
+            z-index: 50;
+        }
+
+        #final-stats {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        #final-stats span {
+            color: #00d2ff;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <h1>NEON SURVIVOR</h1>
-        <p>Survival Time: <span id="time">0</span>s</p>
+    <div id="ui-layer">
+        <div id="start-screen" class="overlay">
+            <h1 class="neon-text">NEON SURVIVOR</h1>
+            <div class="highscore-container">
+                <h2>HIGH SCORES</h2>
+                <ol id="start-highscore-list" class="highscore-list"></ol>
+            </div>
+            <p class="blink">Press SPACE to Start</p>
+        </div>
+
+        <div id="pause-screen" class="overlay hidden">
+            <h1 class="neon-text">PAUSED</h1>
+            <p>Press P to Resume</p>
+        </div>
+
+        <div id="game-over-screen" class="overlay hidden">
+            <h1 class="neon-text red">GAME OVER</h1>
+            <div id="final-stats">
+                <p>Time Survived: <span id="final-time">0</span>s</p>
+                <p>Level Reached: <span id="final-level">1</span></p>
+            </div>
+            <div class="highscore-container">
+                <h2>HIGH SCORES</h2>
+                <ol id="end-highscore-list" class="highscore-list"></ol>
+            </div>
+            <button id="restart-btn">RESTART</button>
+        </div>
+    </div>
+
+    <div id="hud">
+        <div class="hud-top">
+            <p>TIME: <span id="time">0</span>s</p>
+        </div>
     </div>
     <canvas id="gameCanvas"></canvas>
 

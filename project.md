@@ -45,6 +45,12 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Neon blue experience bar (bottom center)
   - [x] Level up mechanic with increasing requirements
 
+- [x] Game Flow & UI
+  - [x] Start Screen with Highscores
+  - [x] Pause functionality (P key)
+  - [x] Game Over screen with stats and restart
+  - [x] Highscore logic (Local Storage)
+
 ## Tech Stack
 - HTML5 Canvas
 - Modern JavaScript (ES6+, Modules)
