@@ -9,8 +9,8 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Centralized constants (`constants.js`)
   - [x] Game Engine for state and loop management
 - [x] Fullscreen Canvas & Rendering
-  - [x] Fixed 1000x1000 game unit viewport scaling (Dynamic Zoom)
-  - [x] Consistent gameplay across different screen sizes/resolutions
+  - [x] Fixed 1000x1000 game unit viewport scaling (Strict Letterboxing)
+  - [x] Square view area centered on screen with black bars
 - [x] Player Movement & World Shift
   - [x] Player fixed in center of the screen
   - [x] WASD / Arrow Key input for movement

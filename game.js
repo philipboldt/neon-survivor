@@ -21,6 +21,8 @@ class GameEngine {
         this.centerX = 0;
         this.centerY = 0;
         this.scale = 1;
+        this.offsetX = 0;
+        this.offsetY = 0;
 
         this.player = new Player();
         this.resetGameState();
@@ -195,22 +197,24 @@ class GameEngine {
         this.width = this.canvas.width = window.innerWidth;
         this.height = this.canvas.height = window.innerHeight;
         
-        // Calculate scale to fit viewport
+        // Calculate scale to fit fixed square viewport
         const viewSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
         this.scale = Math.min(this.width / viewSize, this.height / viewSize);
         
-        // Center of the screen in GAME UNITS
-        this.centerX = (this.width / this.scale) / 2;
-        this.centerY = (this.height / this.scale) / 2;
+        // Fixed game unit dimensions for the square viewport
+        this.centerX = viewSize / 2;
+        this.centerY = viewSize / 2;
+
+        // Screen offsets to center the game box
+        this.offsetX = (this.width - viewSize * this.scale) / 2;
+        this.offsetY = (this.height - viewSize * this.scale) / 2;
     }
 
     spawnEnemy() {
         const now = Date.now();
         if (now - this.lastSpawnTime > CONSTANTS.ENEMY.SPAWN_INTERVAL) {
-            // Use virtual viewport size for spawning logic
-            const vWidth = this.width / this.scale;
-            const vHeight = this.height / this.scale;
-            this.enemies.push(new Enemy(this.player.x, this.player.y, vWidth, vHeight));
+            const vSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
+            this.enemies.push(new Enemy(this.player.x, this.player.y, vSize, vSize));
             this.lastSpawnTime = now;
         }
     }
@@ -377,15 +381,25 @@ class GameEngine {
     render() {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = '#050505'; // Letterbox color
         this.ctx.fillRect(0, 0, this.width, this.height);
         this.ctx.restore();
 
         this.ctx.save();
+        this.ctx.translate(this.offsetX, this.offsetY);
         this.ctx.scale(this.scale, this.scale);
 
-        const vWidth = this.width / this.scale;
-        const vHeight = this.height / this.scale;
+        const vSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
+        
+        // Clip to square viewport
+        this.ctx.beginPath();
+        this.ctx.rect(0, 0, vSize, vSize);
+        this.ctx.clip();
+
+        // Game Background
+        this.ctx.fillStyle = '#000';
+        this.ctx.fillRect(0, 0, vSize, vSize);
+
         const viewLeft = this.player.x - this.centerX;
         const viewRight = this.player.x + this.centerX;
         const viewTop = this.player.y - this.centerY;
@@ -410,7 +424,7 @@ class GameEngine {
             if (sx < 0) sx += CONSTANTS.WORLD.WORLD_SIZE;
             if (sy < 0) sy += CONSTANTS.WORLD.WORLD_SIZE;
             
-            if (sx < vWidth && sy < vHeight) {
+            if (sx < vSize && sy < vSize) {
                 this.ctx.globalAlpha = star.opacity;
                 this.ctx.beginPath();
                 this.ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
@@ -432,7 +446,7 @@ class GameEngine {
             if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('healDot'));
         });
         
-        this.player.draw(this.ctx, this.centerX, this.centerY, vWidth, vHeight, this.sprites.get('player'));
+        this.player.draw(this.ctx, this.centerX, this.centerY, vSize, vSize, this.sprites.get('player'));
         
         this.enemies.forEach(e => {
             if (isVisible(e)) e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('enemy'));
