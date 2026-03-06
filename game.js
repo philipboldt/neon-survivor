@@ -25,6 +25,7 @@ class GameEngine {
         this.offsetY = 0;
 
         this.player = new Player();
+        this.starTiles = [];
         this.resetGameState();
         
         this.keys = {};
@@ -81,9 +82,46 @@ class GameEngine {
         });
 
         this.initSprites();
+        this.generateStarTiles();
         this.resize();
         this.ui.showStartScreen();
         this.loop();
+    }
+
+    generateStarTiles() {
+        const { WORLD_SIZE, STAR_TILE_SIZE, STAR_COUNT, STAR_COLOR } = CONSTANTS.WORLD;
+        const numTiles = Math.ceil(WORLD_SIZE / STAR_TILE_SIZE);
+        const starsPerTile = Math.floor(STAR_COUNT / (numTiles * numTiles));
+
+        this.starTiles = [];
+
+        for (let ty = 0; ty < numTiles; ty++) {
+            for (let tx = 0; tx < numTiles; tx++) {
+                const offscreen = document.createElement('canvas');
+                offscreen.width = STAR_TILE_SIZE;
+                offscreen.height = STAR_TILE_SIZE;
+                const octx = offscreen.getContext('2d');
+
+                octx.fillStyle = STAR_COLOR;
+                for (let i = 0; i < starsPerTile; i++) {
+                    const x = Math.random() * STAR_TILE_SIZE;
+                    const y = Math.random() * STAR_TILE_SIZE;
+                    const size = Math.random() * 2;
+                    const opacity = 0.2 + Math.random() * 0.5;
+
+                    octx.globalAlpha = opacity;
+                    octx.beginPath();
+                    octx.arc(x, y, size, 0, Math.PI * 2);
+                    octx.fill();
+                }
+                
+                this.starTiles.push({
+                    canvas: offscreen,
+                    x: (tx * STAR_TILE_SIZE) - WORLD_SIZE / 2,
+                    y: (ty * STAR_TILE_SIZE) - WORLD_SIZE / 2
+                });
+            }
+        }
     }
 
     initSprites() {
@@ -266,9 +304,13 @@ class GameEngine {
         
         // Weapon priming logic: Check if we are ready to fire
         if (now - this.lastAttackTime >= this.player.cooldown) {
-            // Find enemies in range
+            // Find enemies in range using Spatial Grid for optimization
             const rangeSq = this.player.range * this.player.range;
-            const enemiesInRange = this.enemies
+            
+            // Query a slightly larger area to be safe, or exact if grid allows
+            const nearbyEnemies = this.grid.getNearby(this.player.x, this.player.y);
+            
+            const enemiesInRange = nearbyEnemies
                 .map(enemy => {
                     const dx = enemy.x - this.player.x;
                     const dy = enemy.y - this.player.y;
@@ -542,22 +584,25 @@ class GameEngine {
             CONSTANTS.WORLD.WORLD_SIZE
         );
 
-        // Stars
-        this.ctx.fillStyle = CONSTANTS.WORLD.STAR_COLOR;
-        this.stars.forEach(star => {
-            let sx = (star.x - this.player.x + this.centerX) % CONSTANTS.WORLD.WORLD_SIZE;
-            let sy = (star.y - this.player.y + this.centerY) % CONSTANTS.WORLD.WORLD_SIZE;
-            if (sx < 0) sx += CONSTANTS.WORLD.WORLD_SIZE;
-            if (sy < 0) sy += CONSTANTS.WORLD.WORLD_SIZE;
+        // Stars (Tiled and Pre-rendered)
+        const tileSize = CONSTANTS.WORLD.STAR_TILE_SIZE;
+        const worldSize = CONSTANTS.WORLD.WORLD_SIZE;
+        this.starTiles.forEach(tile => {
+            // Calculate tiled position relative to player with wrapping
+            let sx = (tile.x - this.player.x + this.centerX) % worldSize;
+            let sy = (tile.y - this.player.y + this.centerY) % worldSize;
             
-            if (sx < vSize && sy < vSize) {
-                this.ctx.globalAlpha = star.opacity;
-                this.ctx.beginPath();
-                this.ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
-                this.ctx.fill();
+            // Adjust for negative modulo to keep tiles continuous
+            if (sx < -tileSize) sx += worldSize;
+            if (sx > vSize) sx -= worldSize;
+            if (sy < -tileSize) sy += worldSize;
+            if (sy > vSize) sy -= worldSize;
+
+            // Only draw if tile is partially visible
+            if (sx < vSize && sx + tileSize > 0 && sy < vSize && sy + tileSize > 0) {
+                this.ctx.drawImage(tile.canvas, sx, sy);
             }
         });
-        this.ctx.globalAlpha = 1.0;
 
         // Render Obstacles
         const obsSize = CONSTANTS.WORLD.OBSTACLE_SIZE;
@@ -613,11 +658,11 @@ class GameEngine {
             }
         }
         
-        this.enemies.forEach(e => {
-            if (isVisible(e)) {
-                const sprite = e.type === 'boss' ? this.sprites.get('boss') : this.sprites.get('enemy');
-                e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
-            }
+        // Optimized Enemy Rendering using Spatial Grid
+        const nearbyEntities = this.grid.getNearby(this.player.x, this.player.y);
+        nearbyEntities.forEach(e => {
+            const sprite = e.type === 'boss' ? this.sprites.get('boss') : this.sprites.get('enemy');
+            e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
         });
         
         this.projectiles.forEach(p => {

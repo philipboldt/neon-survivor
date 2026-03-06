@@ -74,6 +74,7 @@ export const CONSTANTS = {
         WORLD_SIZE: 4000,
         VIEWPORT_SIZE: 1000,
         STAR_COLOR: '#666',
+        STAR_TILE_SIZE: 2000,
         SPRITE_PADDING: 20, // Extra space for neon glow
         OBSTACLE_SIZE: 200,
         OBSTACLES: [

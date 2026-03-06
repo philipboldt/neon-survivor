@@ -60,6 +60,9 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Arcade-style character selection UI for highscores
 - [x] Performance Optimizations
   - [x] Sprite Pre-rendering (offscreen canvases for neon glow)
+  - [x] Tiled Starfield Pre-rendering: Stars are drawn once to offscreen tiles instead of 800+ arc calls per frame.
+  - [x] Grid-based Targeting: Weapons use spatial partitioning to find nearest enemies instantly.
+  - [x] Grid-based Rendering: Only enemies in nearby cells are processed for drawing.
   - [x] Squared Distance calculations (avoiding `Math.sqrt`)
   - [x] Spatial Partitioning (Grid system for O(n) collisions)
   - [x] Frustum Culling (skip drawing off-screen entities)
