@@ -44,7 +44,20 @@ export class Enemy {
                 spawnY < playerY + halfHeight
             );
 
-            if (!isVisible) {
+            // Obstacle check
+            let inObstacle = false;
+            const obsHalfSize = CONSTANTS.WORLD.OBSTACLE_SIZE / 2;
+            for (const obs of CONSTANTS.WORLD.OBSTACLES) {
+                if (spawnX > obs.x - obsHalfSize - entitySize && 
+                    spawnX < obs.x + obsHalfSize + entitySize && 
+                    spawnY > obs.y - obsHalfSize - entitySize && 
+                    spawnY < obs.y + obsHalfSize + entitySize) {
+                    inObstacle = true;
+                    break;
+                }
+            }
+
+            if (!isVisible && !inObstacle) {
                 validSpawn = true;
             }
             attempts++;

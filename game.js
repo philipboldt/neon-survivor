@@ -274,10 +274,42 @@ class GameEngine {
         }
     }
 
+    handleObstacleCollision(entity, radius) {
+        const obsSize = CONSTANTS.WORLD.OBSTACLE_SIZE;
+        const halfObs = obsSize / 2;
+        
+        for (const obs of CONSTANTS.WORLD.OBSTACLES) {
+            // Check if entity is within obstacle bounds (with radius)
+            if (entity.x > obs.x - halfObs - radius &&
+                entity.x < obs.x + halfObs + radius &&
+                entity.y > obs.y - halfObs - radius &&
+                entity.y < obs.y + halfObs + radius) {
+                
+                // Determine which side is closest to push out
+                const dxLeft = entity.x - (obs.x - halfObs - radius);
+                const dxRight = (obs.x + halfObs + radius) - entity.x;
+                const dyTop = entity.y - (obs.y - halfObs - radius);
+                const dyBottom = (obs.y + halfObs + radius) - entity.y;
+                
+                const min = Math.min(dxLeft, dxRight, dyTop, dyBottom);
+                
+                if (min === dxLeft) entity.x = obs.x - halfObs - radius;
+                else if (min === dxRight) entity.x = obs.x + halfObs + radius;
+                else if (min === dyTop) entity.y = obs.y - halfObs - radius;
+                else if (min === dyBottom) entity.y = obs.y + halfObs + radius;
+
+                return true; // Collision occurred
+            }
+        }
+        return false;
+    }
+
     update() {
         if (!this.gameRunning || this.isPaused) return;
 
         this.player.update(this.keys);
+        this.handleObstacleCollision(this.player, this.player.radius);
+
         this.handleAutoAttack();
         this.spawnEnemy();
 
@@ -290,6 +322,12 @@ class GameEngine {
             p.update();
             if (p.dead) {
                 this.projectiles.splice(index, 1);
+                return;
+            }
+
+            // Obstacle collision for projectiles
+            if (this.handleObstacleCollision(p, p.size)) {
+                p.dead = true;
                 return;
             }
             
@@ -366,6 +404,8 @@ class GameEngine {
                 enemy.x += (dx / dist) * speed;
                 enemy.y += (dy / dist) * speed;
             }
+
+            this.handleObstacleCollision(enemy, enemy.size / 2);
 
             // Enemy vs Player collision & Damage
             const minPDist = this.player.radius + enemy.size / 2;
@@ -465,6 +505,30 @@ class GameEngine {
             }
         });
         this.ctx.globalAlpha = 1.0;
+
+        // Render Obstacles
+        const obsSize = CONSTANTS.WORLD.OBSTACLE_SIZE;
+        const halfObs = obsSize / 2;
+        this.ctx.strokeStyle = '#444';
+        this.ctx.lineWidth = 2;
+        CONSTANTS.WORLD.OBSTACLES.forEach(obs => {
+            const screenX = obs.x - this.player.x + this.centerX;
+            const screenY = obs.y - this.player.y + this.centerY;
+            
+            if (screenX > -obsSize && screenX < vSize + obsSize &&
+                screenY > -obsSize && screenY < vSize + obsSize) {
+                
+                this.ctx.strokeRect(screenX - halfObs, screenY - halfObs, obsSize, obsSize);
+                
+                // Criss-cross lines
+                this.ctx.beginPath();
+                this.ctx.moveTo(screenX - halfObs, screenY - halfObs);
+                this.ctx.lineTo(screenX + halfObs, screenY + halfObs);
+                this.ctx.moveTo(screenX + halfObs, screenY - halfObs);
+                this.ctx.lineTo(screenX - halfObs, screenY + halfObs);
+                this.ctx.stroke();
+            }
+        });
 
         // Frustum Culling helper
         const isVisible = (e) => {

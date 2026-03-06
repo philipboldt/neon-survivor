@@ -35,6 +35,9 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Strict 4000x4000 world limits
   - [x] Player and Enemy movement clamped to world size
   - [x] Visual border rendering
+  - [x] Map Obstacles: 4 criss-crossed 200x200 squares in the center of each quarter
+  - [x] Obstacles block Player, Enemies, and Projectiles
+  - [x] Enemies cannot spawn inside obstacles
 - [x] Player Health & Damage
   - [x] 15 HP for player
   - [x] Neon green health bar (top center)
