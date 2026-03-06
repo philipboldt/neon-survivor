@@ -52,9 +52,9 @@ export const CONSTANTS = {
         COLOR: '#39ff14' // Neon Green
     },
     WORLD: {
-        STAR_COUNT: 200,
-        WORLD_SIZE: 2000,
-        VIEWPORT_SIZE: 500,
+        STAR_COUNT: 800,
+        WORLD_SIZE: 4000,
+        VIEWPORT_SIZE: 1000,
         STAR_COLOR: '#666'
     }
 };
