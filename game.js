@@ -3,6 +3,7 @@ import { Player } from './src/Player.js';
 import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
 import { ExperienceDot } from './src/ExperienceDot.js';
+import { HealDot } from './src/HealDot.js';
 import { UIManager } from './src/UIManager.js';
 
 class GameEngine {
@@ -27,6 +28,7 @@ class GameEngine {
         this.enemies = [];
         this.projectiles = [];
         this.experienceDots = [];
+        this.healDots = [];
         this.stars = [];
         
         this.startTime = Date.now();
@@ -187,7 +189,11 @@ class GameEngine {
                     enemy.health -= this.player.projectileDamage;
                     p.life = 0;
                     if (enemy.health <= 0) {
-                        this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1));
+                        if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
+                            this.healDots.push(new HealDot(enemy.x, enemy.y));
+                        } else {
+                            this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1));
+                        }
                     }
                 }
             });
@@ -210,6 +216,19 @@ class GameEngine {
                     this.ui.showUpgradeScreen();
                 }
                 this.experienceDots.splice(index, 1);
+            }
+        });
+
+        // Heal Dots
+        this.healDots.forEach((dot, index) => {
+            dot.update(this.player.x, this.player.y);
+            const dx = this.player.x - dot.x;
+            const dy = this.player.y - dot.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < this.player.radius) {
+                this.player.healFull();
+                this.healDots.splice(index, 1);
             }
         });
 
@@ -305,6 +324,7 @@ class GameEngine {
         this.ctx.globalAlpha = 1.0;
 
         this.experienceDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
+        this.healDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.player.draw(this.ctx, this.centerX, this.centerY, this.width, this.height);
         this.enemies.forEach(e => e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.projectiles.forEach(p => p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));

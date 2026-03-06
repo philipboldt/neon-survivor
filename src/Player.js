@@ -37,6 +37,10 @@ export class Player {
         this.health = Math.max(0, this.health - amount);
     }
 
+    healFull() {
+        this.health = this.maxHealth;
+    }
+
     gainExperience(amount) {
         this.experience += amount;
         if (this.experience >= this.experienceToNextLevel) {

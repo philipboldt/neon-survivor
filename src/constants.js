@@ -44,7 +44,12 @@ export const CONSTANTS = {
     EXPERIENCE: {
         SIZE: 3,
         COLOR: '#00d2ff',
-        SPEED_MULTIPLIER: 1.5
+        SPEED_MULTIPLIER: 1.5,
+        HEAL_DROP_CHANCE: 0.05
+    },
+    HEAL: {
+        SIZE: 4,
+        COLOR: '#39ff14' // Neon Green
     },
     WORLD: {
         STAR_COUNT: 200,
