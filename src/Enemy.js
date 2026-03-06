@@ -1,13 +1,17 @@
 import { CONSTANTS } from './constants.js';
 
 export class Enemy {
-    constructor(playerX, playerY, width, height) {
+    constructor(playerX, playerY, width, height, type = 'normal') {
+        this.type = type;
+        const isBoss = type === 'boss';
+        
         // Spawn outside the visible area but within world bounds
         const margin = 50;
         const halfWidth = width / 2;
         const halfHeight = height / 2;
         
         const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
+        const entitySize = isBoss ? CONSTANTS.MINI_BOSS.SIZE : CONSTANTS.ENEMY.SIZE;
         
         let spawnX, spawnY;
         let validSpawn = false;
@@ -30,8 +34,8 @@ export class Enemy {
             }
 
             // Clamp and check if it's actually outside visible area after clamping
-            spawnX = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnX));
-            spawnY = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnY));
+            spawnX = Math.max(-halfSize + entitySize, Math.min(halfSize - entitySize, spawnX));
+            spawnY = Math.max(-halfSize + entitySize, Math.min(halfSize - entitySize, spawnY));
 
             const isVisible = (
                 spawnX > playerX - halfWidth && 
@@ -49,10 +53,11 @@ export class Enemy {
         this.x = spawnX;
         this.y = spawnY;
 
-        this.size = CONSTANTS.ENEMY.SIZE;
-        this.health = 1;
-        this.color = CONSTANTS.ENEMY.COLOR;
-        this.glow = CONSTANTS.ENEMY.COLOR;
+        this.size = entitySize;
+        this.health = isBoss ? CONSTANTS.MINI_BOSS.HEALTH : 1;
+        this.damage = isBoss ? CONSTANTS.MINI_BOSS.DAMAGE : CONSTANTS.ENEMY.DAMAGE;
+        this.color = isBoss ? CONSTANTS.MINI_BOSS.COLOR : CONSTANTS.ENEMY.COLOR;
+        this.glow = this.color;
     }
 
     draw(ctx, playerX, playerY, centerX, centerY, sprite) {

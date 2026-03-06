@@ -173,10 +173,32 @@
             color: #666;
             margin-top: 0.5rem;
         }
+
+        /* Boss Notification */
+        #boss-notification {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+            z-index: 200;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            letter-spacing: 0.3em;
+            font-weight: bold;
+        }
+
+        #boss-notification.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <div id="ui-layer">
+        <div id="boss-notification">MINI BOSS SPAWNED</div>
         <div id="start-screen" class="overlay">
             <h1 class="neon-text">NEON SURVIVOR</h1>
             <div class="highscore-container">

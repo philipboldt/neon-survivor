@@ -35,6 +35,14 @@ export const CONSTANTS = {
         DAMAGE: 1,
         ATTACK_COOLDOWN: 1000
     },
+    MINI_BOSS: {
+        SIZE: 40,
+        HEALTH: 10,
+        DAMAGE: 3,
+        COLOR: '#ff00ff', // Neon Purple/Magenta
+        SPAWN_INTERVAL: 60000,
+        EXP_VALUE: 10
+    },
     PROJECTILE: {
         SPEED: 7,
         SIZE: 4,

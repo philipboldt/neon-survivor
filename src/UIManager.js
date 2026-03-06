@@ -15,7 +15,8 @@ export class UIManager {
             nameInputContainer: document.getElementById('name-input-container'),
             saveNameBtn: document.getElementById('save-name'),
             charEls: document.querySelectorAll('.arcade-input .char'),
-            touchArrows: document.querySelectorAll('.touch-arrow')
+            touchArrows: document.querySelectorAll('.touch-arrow'),
+            bossNotification: document.getElementById('boss-notification')
         };
 
         this.nameInputActive = false;
@@ -158,6 +159,14 @@ export class UIManager {
 
     updateTime(seconds) {
         this.els.time.textContent = seconds;
+    }
+
+    showBossNotification() {
+        if (!this.els.bossNotification) return;
+        this.els.bossNotification.classList.add('show');
+        setTimeout(() => {
+            this.els.bossNotification.classList.remove('show');
+        }, 3000);
     }
 
     updateHighScores(newEntry) {

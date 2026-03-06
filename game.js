@@ -40,6 +40,7 @@ class GameEngine {
         
         this.startTime = Date.now();
         this.lastSpawnTime = 0;
+        this.lastBossSpawnTime = 0;
         this.lastAttackTime = 0;
         this.gameRunning = false;
         this.isPaused = false;
@@ -107,6 +108,16 @@ class GameEngine {
             ctx.shadowBlur = 15;
             ctx.shadowColor = CONSTANTS.ENEMY.COLOR;
             ctx.strokeRect(cx - CONSTANTS.ENEMY.SIZE / 2, cy - CONSTANTS.ENEMY.SIZE / 2, CONSTANTS.ENEMY.SIZE, CONSTANTS.ENEMY.SIZE);
+        });
+
+        // Mini Boss Sprite
+        const bSize = (CONSTANTS.MINI_BOSS.SIZE + padding) * 2;
+        this.sprites.preRender('boss', bSize, bSize, (ctx, cx, cy) => {
+            ctx.strokeStyle = CONSTANTS.MINI_BOSS.COLOR;
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = CONSTANTS.MINI_BOSS.COLOR;
+            ctx.strokeRect(cx - CONSTANTS.MINI_BOSS.SIZE / 2, cy - CONSTANTS.MINI_BOSS.SIZE / 2, CONSTANTS.MINI_BOSS.SIZE, CONSTANTS.MINI_BOSS.SIZE);
         });
 
         // Projectile Sprite
@@ -218,6 +229,15 @@ class GameEngine {
     spawnEnemy() {
         const now = Date.now();
         const survivalTime = (now - this.startTime) / 1000;
+
+        // Mini Boss Spawning every 60 seconds
+        if (now - this.lastBossSpawnTime > CONSTANTS.MINI_BOSS.SPAWN_INTERVAL) {
+            const vSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
+            this.enemies.push(new Enemy(this.player.x, this.player.y, vSize, vSize, 'boss'));
+            this.lastBossSpawnTime = now;
+            this.ui.showBossNotification();
+        }
+
         const currentInterval = Math.max(100, CONSTANTS.ENEMY.SPAWN_INTERVAL - Math.floor(survivalTime / 15) * 50);
 
         if (now - this.lastSpawnTime > currentInterval) {
@@ -287,7 +307,12 @@ class GameEngine {
                         if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
                             this.healDots.push(new HealDot(enemy.x, enemy.y));
                         } else {
-                            this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1));
+                            const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
+                            for (let i = 0; i < dots; i++) {
+                                const ox = (Math.random() - 0.5) * 30;
+                                const oy = (Math.random() - 0.5) * 30;
+                                this.experienceDots.push(new ExperienceDot(enemy.x + ox, enemy.y + oy, 1));
+                            }
                         }
                     }
                 }
@@ -350,7 +375,7 @@ class GameEngine {
 
                 if (!enemy.lastAttackTime) enemy.lastAttackTime = 0;
                 if (now - enemy.lastAttackTime > CONSTANTS.ENEMY.ATTACK_COOLDOWN) {
-                    this.player.takeDamage(CONSTANTS.ENEMY.DAMAGE);
+                    this.player.takeDamage(enemy.damage);
                     enemy.lastAttackTime = now;
                 }
             }
@@ -362,7 +387,7 @@ class GameEngine {
                 const edx = enemy.x - other.x;
                 const edy = enemy.y - other.y;
                 const edistSq = edx * edx + edy * edy;
-                const minDist = enemy.size;
+                const minDist = (enemy.size + other.size) / 2;
                 if (edistSq < minDist * minDist && edistSq > 0) {
                     const edist = Math.sqrt(edistSq);
                     const overlap = (minDist - edist) / 2;
@@ -457,7 +482,10 @@ class GameEngine {
         this.player.draw(this.ctx, this.centerX, this.centerY, vSize, vSize, this.sprites.get('player'));
         
         this.enemies.forEach(e => {
-            if (isVisible(e)) e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('enemy'));
+            if (isVisible(e)) {
+                const sprite = e.type === 'boss' ? this.sprites.get('boss') : this.sprites.get('enemy');
+                e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
+            }
         });
         
         this.projectiles.forEach(p => {
