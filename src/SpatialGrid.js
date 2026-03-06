@@ -1,8 +1,10 @@
+import { CONSTANTS } from './constants.js';
+
 /**
  * A simple 2D spatial grid for optimization.
  */
 export class SpatialGrid {
-    constructor(worldSize, cellSize) {
+    constructor(worldSize, cellSize = CONSTANTS.WORLD.GRID_CELL_SIZE) {
         this.cellSize = cellSize;
         this.worldSize = worldSize;
         this.halfSize = worldSize / 2;

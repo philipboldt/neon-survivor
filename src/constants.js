@@ -33,7 +33,8 @@ export const CONSTANTS = {
         COLOR: '#ff003c',
         SPAWN_INTERVAL: 500,
         DAMAGE: 1,
-        ATTACK_COOLDOWN: 1000
+        ATTACK_COOLDOWN: 1000,
+        SPAWN_MARGIN: 50
     },
     MINI_BOSS: {
         SIZE: 40,
@@ -41,7 +42,8 @@ export const CONSTANTS = {
         DAMAGE: 3,
         COLOR: '#ff00ff', // Neon Purple/Magenta
         SPAWN_INTERVAL: 45000,
-        EXP_VALUE: 10
+        EXP_VALUE: 10,
+        NOTIFICATION_DURATION: 3000
     },
     PROJECTILE: {
         SPEED: 7,
@@ -60,7 +62,8 @@ export const CONSTANTS = {
         SIZE: 3,
         COLOR: '#00d2ff',
         SPEED_MULTIPLIER: 1.5,
-        HEAL_DROP_CHANCE: 0.05
+        HEAL_DROP_CHANCE: 0.05,
+        DROP_SPREAD: 30
     },
     HEAL: {
         SIZE: 4,
@@ -78,6 +81,22 @@ export const CONSTANTS = {
             { x: 1000, y: -1000 },
             { x: -1000, y: 1000 },
             { x: 1000, y: 1000 }
-        ]
+        ],
+        GRID_CELL_SIZE: 100,
+        BORDER_COLOR: '#333',
+        BORDER_WIDTH: 5,
+        OBSTACLE_COLOR: '#444',
+        OBSTACLE_LINE_WIDTH: 2,
+        LETTERBOX_COLOR: '#050505',
+        BG_COLOR: '#000'
+    },
+    UI: {
+        HIGH_SCORE_LIMIT: 3,
+        DEFAULT_HIGH_SCORES: [
+            { name: 'NEO', score: 100 },
+            { name: 'TRN', score: 50 },
+            { name: 'FLY', score: 25 }
+        ],
+        LS_KEY: 'neonSurvivorHighScores'
     }
 };

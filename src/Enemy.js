@@ -6,7 +6,7 @@ export class Enemy {
         const isBoss = type === 'boss';
         
         // Spawn outside the visible area but within world bounds
-        const margin = 50;
+        const margin = CONSTANTS.ENEMY.SPAWN_MARGIN;
         const halfWidth = width / 2;
         const halfHeight = height / 2;
         

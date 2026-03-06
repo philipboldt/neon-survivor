@@ -14,7 +14,7 @@ class GameEngine {
         this.ctx = this.canvas.getContext('2d');
         this.ui = new UIManager();
         this.sprites = new SpriteManager();
-        this.grid = new SpatialGrid(CONSTANTS.WORLD.WORLD_SIZE, 100);
+        this.grid = new SpatialGrid(CONSTANTS.WORLD.WORLD_SIZE, CONSTANTS.WORLD.GRID_CELL_SIZE);
 
         this.width = 0;
         this.height = 0;
@@ -355,8 +355,8 @@ class GameEngine {
                             } else {
                                 const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
                                 for (let j = 0; j < dots; j++) {
-                                    const oxDot = (Math.random() - 0.5) * 30;
-                                    const oyDot = (Math.random() - 0.5) * 30;
+                                    const oxDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                    const oyDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
                                     this.experienceDots.push(new ExperienceDot(enemy.x + oxDot, enemy.y + oyDot, 1));
                                 }
                             }
@@ -400,8 +400,8 @@ class GameEngine {
                         } else {
                             const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
                             for (let i = 0; i < dots; i++) {
-                                const ox = (Math.random() - 0.5) * 30;
-                                const oy = (Math.random() - 0.5) * 30;
+                                const ox = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                const oy = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
                                 this.experienceDots.push(new ExperienceDot(enemy.x + ox, enemy.y + oy, 1));
                             }
                         }
@@ -507,7 +507,7 @@ class GameEngine {
     render() {
         this.ctx.save();
         this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.fillStyle = '#050505'; // Letterbox color
+        this.ctx.fillStyle = CONSTANTS.WORLD.LETTERBOX_COLOR;
         this.ctx.fillRect(0, 0, this.width, this.height);
         this.ctx.restore();
 
@@ -523,7 +523,7 @@ class GameEngine {
         this.ctx.clip();
 
         // Game Background
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = CONSTANTS.WORLD.BG_COLOR;
         this.ctx.fillRect(0, 0, vSize, vSize);
 
         const viewLeft = this.player.x - this.centerX;
@@ -533,8 +533,8 @@ class GameEngine {
 
         // Render World Border
         const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
-        this.ctx.strokeStyle = '#333';
-        this.ctx.lineWidth = 5;
+        this.ctx.strokeStyle = CONSTANTS.WORLD.BORDER_COLOR;
+        this.ctx.lineWidth = CONSTANTS.WORLD.BORDER_WIDTH;
         this.ctx.strokeRect(
             -halfSize - this.player.x + this.centerX,
             -halfSize - this.player.y + this.centerY,
@@ -562,8 +562,8 @@ class GameEngine {
         // Render Obstacles
         const obsSize = CONSTANTS.WORLD.OBSTACLE_SIZE;
         const halfObs = obsSize / 2;
-        this.ctx.strokeStyle = '#444';
-        this.ctx.lineWidth = 2;
+        this.ctx.strokeStyle = CONSTANTS.WORLD.OBSTACLE_COLOR;
+        this.ctx.lineWidth = CONSTANTS.WORLD.OBSTACLE_LINE_WIDTH;
         CONSTANTS.WORLD.OBSTACLES.forEach(obs => {
             const screenX = obs.x - this.player.x + this.centerX;
             const screenY = obs.y - this.player.y + this.centerY;

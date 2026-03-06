@@ -166,13 +166,13 @@ export class UIManager {
         this.els.bossNotification.classList.add('show');
         setTimeout(() => {
             this.els.bossNotification.classList.remove('show');
-        }, 3000);
+        }, CONSTANTS.MINI_BOSS.NOTIFICATION_DURATION);
     }
 
     updateHighScores(newEntry) {
         let scores = [];
         try {
-            const saved = localStorage.getItem('neonSurvivorHighScores');
+            const saved = localStorage.getItem(CONSTANTS.UI.LS_KEY);
             if (saved) {
                 scores = JSON.parse(saved);
                 // Migration: convert old number-only scores to objects
@@ -180,11 +180,7 @@ export class UIManager {
                     scores = scores.map(s => ({ name: '???' , score: s }));
                 }
             } else {
-                scores = [
-                    { name: 'NEO', score: 100 },
-                    { name: 'TRN', score: 50 },
-                    { name: 'FLY', score: 25 }
-                ];
+                scores = JSON.parse(JSON.stringify(CONSTANTS.UI.DEFAULT_HIGH_SCORES));
             }
         } catch (e) {
             console.warn('LocalStorage not available', e);
@@ -193,9 +189,9 @@ export class UIManager {
         if (newEntry !== undefined) {
             scores.push(newEntry);
             scores.sort((a, b) => b.score - a.score);
-            scores = scores.slice(0, 3);
+            scores = scores.slice(0, CONSTANTS.UI.HIGH_SCORE_LIMIT);
             try {
-                localStorage.setItem('neonSurvivorHighScores', JSON.stringify(scores));
+                localStorage.setItem(CONSTANTS.UI.LS_KEY, JSON.stringify(scores));
             } catch (e) {
                 console.warn('Failed to save highscore', e);
             }
@@ -218,18 +214,18 @@ export class UIManager {
     isHighscore(score) {
         let scores = [];
         try {
-            const saved = localStorage.getItem('neonSurvivorHighScores');
+            const saved = localStorage.getItem(CONSTANTS.UI.LS_KEY);
             if (saved) {
                 scores = JSON.parse(saved);
                 if (scores.length > 0 && typeof scores[0] === 'number') {
                     scores = scores.map(s => ({ name: '???' , score: s }));
                 }
             } else {
-                scores = [{ score: 100 }, { score: 50 }, { score: 25 }];
+                scores = JSON.parse(JSON.stringify(CONSTANTS.UI.DEFAULT_HIGH_SCORES));
             }
         } catch (e) {
             return false;
         }
-        return scores.length < 3 || score > scores[scores.length - 1].score;
+        return scores.length < CONSTANTS.UI.HIGH_SCORE_LIMIT || score > scores[scores.length - 1].score;
     }
 }

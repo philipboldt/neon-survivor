@@ -6,7 +6,7 @@ A functional game prototype where the player survives against waves of enemies i
 - [x] Initial Project Setup
 - [x] Code Refactoring & Modularization
   - [x] Extracted classes (`Player`, `Enemy`, `Projectile`)
-  - [x] Centralized constants (`constants.js`)
+  - [x] Centralized constants (`constants.js`) - All "magic numbers" and configuration values moved here.
   - [x] Game Engine for state and loop management
 - [x] Fullscreen Canvas & Rendering
   - [x] Fixed 1000x1000 game unit viewport scaling (Strict Letterboxing)
