@@ -14,7 +14,7 @@ export class Player {
         this.maxHealth = CONSTANTS.PLAYER.MAX_HEALTH;
 
         this.experience = 0;
-        this.experienceToNextLevel = 10;
+        this.experienceToNextLevel = CONSTANTS.PLAYER.INITIAL_EXP;
         this.level = 1;
 
         this.numProjectiles = 1;
@@ -55,7 +55,7 @@ export class Player {
     levelUp() {
         this.experience -= this.experienceToNextLevel;
         this.level++;
-        this.experienceToNextLevel = Math.floor(this.experienceToNextLevel * 1.5);
+        this.experienceToNextLevel = Math.floor(this.experienceToNextLevel * CONSTANTS.PLAYER.EXP_MULTIPLIER);
     }
 
     draw(ctx, centerX, centerY, width, height, sprite) {

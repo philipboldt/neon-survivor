@@ -23,7 +23,9 @@ export const CONSTANTS = {
             WIDTH: 400,
             HEIGHT: 300,
             COLOR: '#00d2ff'
-        }
+        },
+        INITIAL_EXP: 5,
+        EXP_MULTIPLIER: 1.5
     },
     ENEMY: {
         MAX_SPEED: 2.2,
