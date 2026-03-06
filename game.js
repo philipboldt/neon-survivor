@@ -249,7 +249,9 @@ class GameEngine {
 
     handleAutoAttack() {
         const now = Date.now();
-        if (now - this.lastAttackTime > this.player.cooldown) {
+        
+        // Weapon priming logic: Check if we are ready to fire
+        if (now - this.lastAttackTime >= this.player.cooldown) {
             // Find enemies in range
             const rangeSq = this.player.range * this.player.range;
             const enemiesInRange = this.enemies
@@ -262,13 +264,14 @@ class GameEngine {
                 .filter(item => item.distSq < rangeSq)
                 .sort((a, b) => a.distSq - b.distSq);
 
+            // Fire immediately if enemies are in range, otherwise weapon stays "primed"
             if (enemiesInRange.length > 0) {
-                // Shoot at multiple targets if available
                 const shots = Math.min(this.player.numProjectiles, enemiesInRange.length);
                 for (let i = 0; i < shots; i++) {
                     const target = enemiesInRange[i].enemy;
                     this.projectiles.push(new Projectile(this.player.x, this.player.y, target.x, target.y, this.player.range));
                 }
+                // Reset cooldown only AFTER firing
                 this.lastAttackTime = now;
             }
         }

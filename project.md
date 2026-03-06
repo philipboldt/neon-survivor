@@ -29,6 +29,7 @@ A functional game prototype where the player survives against waves of enemies i
 - [x] Weapon System
   - [x] Player Range (visualized with dashed circle)
   - [x] Automatic targeting of nearest enemy
+  - [x] Weapon Priming: Fires immediately when an enemy enters range if cooldown is ready
   - [x] Projectiles (Blue glowing circles)
   - [x] Enemy Health and Damage mechanics
 - [x] World Boundaries
