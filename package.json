@@ -1,0 +1,14 @@
+{
+  "name": "neon-survivor",
+  "version": "1.0.0",
+  "description": "A survival-style game with a neon aesthetic.",
+  "main": "game.js",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "serve": "npx serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

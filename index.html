@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Neon Survivor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="game-wrap">
+    <h1 class="title">NEON SURVIVOR</h1>
+    <div class="canvas-container">
+      <canvas id="game" width="800" height="600"></canvas>
+      <div id="start-screen" class="overlay">
+        <div class="highscore-container">
+          <h2>HIGH SCORES</h2>
+          <ol class="highscore-list">
+            <li>---</li>
+            <li>---</li>
+            <li>---</li>
+          </ol>
+        </div>
+        <p class="blink">Press SPACE or Tap to start</p>
+      </div>
+      <div id="overlay" class="overlay hidden">
+        <p id="overlay-text">GAME OVER</p>
+        <button id="restart">Play again</button>
+      </div>
+    </div>
+    <div id="touch-controls" class="touch-controls">
+      <button id="btn-left" class="touch-btn">◀</button>
+      <button id="btn-shoot" class="touch-btn shoot">SHOOT</button>
+      <button id="btn-pause" class="touch-btn pause">⏸</button>
+      <button id="btn-right" class="touch-btn">▶</button>
+    </div>
+    <p class="controls">WASD to move · SPACE to start</p>
+  </div>
+  <script type="module" src="game.js"></script>
+</body>
+
+</html>
