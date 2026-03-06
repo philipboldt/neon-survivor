@@ -47,7 +47,7 @@ A functional game prototype where the player survives against waves of enemies i
 
 - [x] Game Flow & UI
   - [x] Start Screen with Highscores
-  - [x] Pause functionality (P key)
+  - [x] Pause functionality (SPACE key)
   - [x] Game Over screen with stats and restart
   - [x] Highscore logic (Local Storage)
 

@@ -63,13 +63,13 @@ class GameEngine {
     handleKeyDown(e) {
         this.keys[e.code] = true;
 
-        if (e.code === 'Space' && !this.gameRunning && !this.ui.els.startScreen.classList.contains('hidden')) {
-            this.startGame();
-        }
-
-        if (e.code === 'KeyP' && this.gameRunning) {
-            this.isPaused = !this.isPaused;
-            this.ui.togglePause(this.isPaused);
+        if (e.code === 'Space') {
+            if (!this.gameRunning && !this.ui.els.startScreen.classList.contains('hidden')) {
+                this.startGame();
+            } else if (this.gameRunning) {
+                this.isPaused = !this.isPaused;
+                this.ui.togglePause(this.isPaused);
+            }
         }
     }
 
