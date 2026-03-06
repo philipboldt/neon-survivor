@@ -54,6 +54,7 @@ export const CONSTANTS = {
     WORLD: {
         STAR_COUNT: 200,
         WORLD_SIZE: 2000,
+        VIEWPORT_SIZE: 500,
         STAR_COLOR: '#666'
     }
 };

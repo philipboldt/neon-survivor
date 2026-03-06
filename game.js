@@ -16,6 +16,7 @@ class GameEngine {
         this.height = 0;
         this.centerX = 0;
         this.centerY = 0;
+        this.scale = 1;
 
         this.player = new Player();
         this.resetGameState();
@@ -127,16 +128,25 @@ class GameEngine {
     }
 
     resize() {
-        this.width = this.canvas.width = window.innerWidth;
-        this.height = this.canvas.height = window.innerHeight;
-        this.centerX = this.width / 2;
-        this.centerY = this.height / 2;
+        this.width = canvas.width = window.innerWidth;
+        this.height = canvas.height = window.innerHeight;
+        
+        // Calculate scale to fit 500x500 viewport
+        const viewSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
+        this.scale = Math.min(this.width / viewSize, this.height / viewSize);
+        
+        // Center of the screen in GAME UNITS
+        this.centerX = (this.width / this.scale) / 2;
+        this.centerY = (this.height / this.scale) / 2;
     }
 
     spawnEnemy() {
         const now = Date.now();
         if (now - this.lastSpawnTime > CONSTANTS.ENEMY.SPAWN_INTERVAL) {
-            this.enemies.push(new Enemy(this.player.x, this.player.y, this.width, this.height));
+            // Use virtual viewport size for spawning logic
+            const vWidth = this.width / this.scale;
+            const vHeight = this.height / this.scale;
+            this.enemies.push(new Enemy(this.player.x, this.player.y, vWidth, vHeight));
             this.lastSpawnTime = now;
         }
     }
@@ -293,8 +303,14 @@ class GameEngine {
     }
 
     render() {
+        this.ctx.save();
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.restore();
+
+        this.ctx.save();
+        this.ctx.scale(this.scale, this.scale);
 
         // Render World Border
         const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
@@ -314,7 +330,12 @@ class GameEngine {
             let sy = (star.y - this.player.y + this.centerY) % CONSTANTS.WORLD.WORLD_SIZE;
             if (sx < 0) sx += CONSTANTS.WORLD.WORLD_SIZE;
             if (sy < 0) sy += CONSTANTS.WORLD.WORLD_SIZE;
-            if (sx < this.width && sy < this.height) {
+            
+            // Draw stars relative to the game units viewport
+            const vWidth = this.width / this.scale;
+            const vHeight = this.height / this.scale;
+            
+            if (sx < vWidth && sy < vHeight) {
                 this.ctx.globalAlpha = star.opacity;
                 this.ctx.beginPath();
                 this.ctx.arc(sx, sy, star.size, 0, Math.PI * 2);
@@ -325,9 +346,14 @@ class GameEngine {
 
         this.experienceDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.healDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
-        this.player.draw(this.ctx, this.centerX, this.centerY, this.width, this.height);
+        
+        // Pass virtual dimensions to draw UI elements like health bar
+        this.player.draw(this.ctx, this.centerX, this.centerY, this.width / this.scale, this.height / this.scale);
+        
         this.enemies.forEach(e => e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.projectiles.forEach(p => p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
+        
+        this.ctx.restore();
     }
 
     loop() {
