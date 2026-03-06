@@ -44,6 +44,18 @@ class GameEngine {
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
         window.addEventListener('keyup', (e) => this.keys[e.code] = false);
 
+        // Click to Start/Restart/Resume
+        this.ui.els.startScreen.addEventListener('click', () => {
+            if (!this.gameRunning) this.startGame();
+        });
+
+        this.ui.els.pauseScreen.addEventListener('click', () => {
+            if (this.gameRunning && this.isPaused) {
+                this.isPaused = false;
+                this.ui.togglePause(false);
+            }
+        });
+
         if (this.ui.els.restartBtn) {
             this.ui.els.restartBtn.addEventListener('click', () => this.startGame());
         }
