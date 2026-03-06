@@ -217,7 +217,10 @@ class GameEngine {
 
     spawnEnemy() {
         const now = Date.now();
-        if (now - this.lastSpawnTime > CONSTANTS.ENEMY.SPAWN_INTERVAL) {
+        const survivalTime = (now - this.startTime) / 1000;
+        const currentInterval = Math.max(100, CONSTANTS.ENEMY.SPAWN_INTERVAL - Math.floor(survivalTime / 15) * 50);
+
+        if (now - this.lastSpawnTime > currentInterval) {
             const vSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
             this.enemies.push(new Enemy(this.player.x, this.player.y, vSize, vSize));
             this.lastSpawnTime = now;

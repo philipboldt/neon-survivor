@@ -17,6 +17,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] World (enemies, grid) moves relative to the player
 - [x] Enemy Spawning & AI
   - [x] Spawn only in non-visible parts of the map (outside screen)
+  - [x] Dynamic Spawn Rate: Decreases spawn interval every 15 seconds (increases difficulty)
   - [x] Move towards player's world position
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)
 - [x] Visuals
