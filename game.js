@@ -124,12 +124,20 @@ class GameEngine {
                 enemy.y += (dy / dist) * speed;
             }
 
-            // Enemy vs Player collision
+            // Enemy vs Player collision & Damage
             const pDist = Math.sqrt((enemy.x - this.player.x)**2 + (enemy.y - this.player.y)**2);
             const minPDist = this.player.radius + enemy.size / 2;
             if (pDist < minPDist && pDist > 0) {
                 enemy.x = this.player.x + ((enemy.x - this.player.x) / pDist) * minPDist;
                 enemy.y = this.player.y + ((enemy.y - this.player.y) / pDist) * minPDist;
+
+                // Melee Damage
+                const now = Date.now();
+                if (!enemy.lastAttackTime) enemy.lastAttackTime = 0;
+                if (now - enemy.lastAttackTime > CONSTANTS.ENEMY.ATTACK_COOLDOWN) {
+                    this.player.takeDamage(CONSTANTS.ENEMY.DAMAGE);
+                    enemy.lastAttackTime = now;
+                }
             }
         });
 
@@ -187,7 +195,7 @@ class GameEngine {
         });
         this.ctx.globalAlpha = 1.0;
 
-        this.player.draw(this.ctx, this.centerX, this.centerY);
+        this.player.draw(this.ctx, this.centerX, this.centerY, this.width, this.height);
         this.enemies.forEach(e => e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.projectiles.forEach(p => p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
     }

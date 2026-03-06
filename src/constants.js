@@ -4,7 +4,14 @@ export const CONSTANTS = {
         SPEED: 5,
         RANGE: 250,
         COLOR: '#00d2ff',
-        WEAPON_COOLDOWN: 1000
+        WEAPON_COOLDOWN: 1000,
+        MAX_HEALTH: 15,
+        HEALTH_BAR: {
+            WIDTH: 300,
+            HEIGHT: 20,
+            COLOR: '#39ff14', // Neon Green
+            BG_COLOR: '#222'
+        }
     },
     ENEMY: {
         MAX_SPEED: 2.2,
@@ -12,7 +19,9 @@ export const CONSTANTS = {
         MAX_ACCEL_DIST: 500,
         SIZE: 15,
         COLOR: '#ff003c',
-        SPAWN_INTERVAL: 500
+        SPAWN_INTERVAL: 500,
+        DAMAGE: 1,
+        ATTACK_COOLDOWN: 1000 // 1 second
     },
     PROJECTILE: {
         SPEED: 7,

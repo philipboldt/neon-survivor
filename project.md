@@ -32,6 +32,11 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Player and Enemy movement clamped to world size
   - [x] Visual border rendering
 
+- [x] Player Health & Damage
+  - [x] 15 HP for player
+  - [x] Neon green health bar (top center)
+  - [x] Melee damage from enemies (1 damage per second)
+
 ## Tech Stack
 - HTML5 Canvas
 - Modern JavaScript (ES6+, Modules)

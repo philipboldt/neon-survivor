@@ -9,6 +9,8 @@ export class Player {
         this.range = CONSTANTS.PLAYER.RANGE;
         this.color = CONSTANTS.PLAYER.COLOR;
         this.cooldown = CONSTANTS.PLAYER.WEAPON_COOLDOWN;
+        this.health = CONSTANTS.PLAYER.MAX_HEALTH;
+        this.maxHealth = CONSTANTS.PLAYER.MAX_HEALTH;
     }
 
     update(keys) {
@@ -23,7 +25,13 @@ export class Player {
         this.y = Math.max(-halfSize + this.radius, Math.min(halfSize - this.radius, this.y));
     }
 
-    draw(ctx, centerX, centerY) {
+    takeDamage(amount) {
+        this.health = Math.max(0, this.health - amount);
+    }
+
+    draw(ctx, centerX, centerY, width, height) {
+        this.drawHealthBar(ctx, width);
+
         // Range Indicator
         ctx.save();
         ctx.strokeStyle = '#333';
@@ -44,6 +52,30 @@ export class Player {
         ctx.beginPath();
         ctx.arc(centerX, centerY, this.radius, 0, Math.PI * 2);
         ctx.stroke();
+        ctx.restore();
+    }
+
+    drawHealthBar(ctx, screenWidth) {
+        const { WIDTH, HEIGHT, COLOR, BG_COLOR } = CONSTANTS.PLAYER.HEALTH_BAR;
+        const x = (screenWidth - WIDTH) / 2;
+        const y = 20;
+
+        // Background
+        ctx.save();
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(x, y, WIDTH, HEIGHT);
+
+        // Filled part
+        const healthPercent = this.health / this.maxHealth;
+        ctx.fillStyle = COLOR;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = COLOR;
+        ctx.fillRect(x, y, WIDTH * healthPercent, HEIGHT);
+        
+        // Border
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, WIDTH, HEIGHT);
         ctx.restore();
     }
 }
