@@ -5,7 +5,8 @@ A functional game prototype where the player survives against waves of enemies i
 ## Current Status
 - [x] Initial Project Setup
 - [x] Code Refactoring & Modularization
-  - [x] Extracted classes (`Player`, `Enemy`, `Projectile`)
+  - [x] Extracted classes (`Player`, `Enemy`, `Projectile`, `Box`, `Dot`)
+  - [x] Unified Pickup System: All dots (Exp, Heal, Magnet, Gold) handled by a single `Dot` class.
   - [x] Centralized constants (`constants.js`) - All "magic numbers" and configuration values moved here.
   - [x] Game Engine for state and loop management
 - [x] Fullscreen Canvas & Rendering

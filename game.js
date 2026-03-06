@@ -2,10 +2,7 @@ import { CONSTANTS } from './src/constants.js';
 import { Player } from './src/Player.js';
 import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
-import { ExperienceDot } from './src/ExperienceDot.js';
-import { HealDot } from './src/HealDot.js';
-import { MagnetDot } from './src/MagnetDot.js';
-import { GoldDot } from './src/GoldDot.js';
+import { Dot } from './src/Dot.js';
 import { Box } from './src/Box.js';
 import { UIManager } from './src/UIManager.js';
 import { SpriteManager } from './src/SpriteManager.js';
@@ -39,10 +36,7 @@ class GameEngine {
         this.enemies = [];
         this.boxes = [];
         this.projectiles = [];
-        this.experienceDots = [];
-        this.healDots = [];
-        this.magnetDots = [];
-        this.goldDots = [];
+        this.pickups = []; // Unified array for all dots
         this.stars = [];
         
         this.startTime = Date.now();
@@ -458,19 +452,19 @@ class GameEngine {
                         if (entity.health <= 0) {
                             if (entity instanceof Box) {
                                 if (Math.random() < 0.5) {
-                                    this.magnetDots.push(new MagnetDot(entity.x, entity.y));
+                                    this.pickups.push(new Dot(entity.x, entity.y, 'magnet'));
                                 } else {
-                                    this.goldDots.push(new GoldDot(entity.x, entity.y));
+                                    this.pickups.push(new Dot(entity.x, entity.y, 'gold'));
                                 }
                             } else {
                                 if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
-                                    this.healDots.push(new HealDot(entity.x, entity.y));
+                                    this.pickups.push(new Dot(entity.x, entity.y, 'heal'));
                                 } else {
                                     const dots = entity.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
                                     for (let j = 0; j < dots; j++) {
                                         const oxDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
                                         const oyDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                        this.experienceDots.push(new ExperienceDot(entity.x + oxDot, enemy.y + oyDot, 1));
+                                        this.pickups.push(new Dot(entity.x + oxDot, entity.y + oyDot, 'exp', 1));
                                     }
                                 }
                             }
@@ -512,19 +506,19 @@ class GameEngine {
                     if (entity.health <= 0) {
                         if (entity instanceof Box) {
                             if (Math.random() < 0.5) {
-                                this.magnetDots.push(new MagnetDot(entity.x, entity.y));
+                                this.pickups.push(new Dot(entity.x, entity.y, 'magnet'));
                             } else {
-                                this.goldDots.push(new GoldDot(entity.x, entity.y));
+                                this.pickups.push(new Dot(entity.x, entity.y, 'gold'));
                             }
                         } else {
                             if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
-                                this.healDots.push(new HealDot(entity.x, entity.y));
+                                this.pickups.push(new Dot(entity.x, entity.y, 'heal'));
                             } else {
                                 const dots = entity.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
                                 for (let i = 0; i < dots; i++) {
                                     const ox = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
                                     const oy = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                    this.experienceDots.push(new ExperienceDot(entity.x + ox, entity.y + oy, 1));
+                                    this.pickups.push(new Dot(entity.x + ox, entity.y + oy, 'exp', 1));
                                 }
                             }
                         }
@@ -536,70 +530,42 @@ class GameEngine {
         this.enemies = this.enemies.filter(enemy => enemy.health > 0);
         this.boxes = this.boxes.filter(box => box.health > 0);
 
-        // Experience Dots
-        this.experienceDots.forEach((dot, index) => {
+        // Pickups (Experience, Heal, Magnet, Gold)
+        for (let i = this.pickups.length - 1; i >= 0; i--) {
+            const dot = this.pickups[i];
             dot.update(this.player.x, this.player.y);
-            const dx = this.player.x - dot.x;
-            const dy = this.player.y - dot.y;
-            const distSq = dx * dx + dy * dy;
-            
-            if (distSq < this.player.radius * this.player.radius) {
-                const leveledUp = this.player.gainExperience(dot.value);
-                if (leveledUp) {
-                    this.pendingUpgrades++;
-                    this.isPaused = true;
-                    this.ui.showUpgradeScreen();
-                }
-                this.experienceDots.splice(index, 1);
-            }
-        });
 
-        // Magnet Dots
-        this.magnetDots.forEach((dot, index) => {
-            dot.update(this.player.x, this.player.y);
-            const dx = this.player.x - dot.x;
-            const dy = this.player.y - dot.y;
-            const distSq = dx * dx + dy * dy;
-            
-            if (distSq < this.player.radius * this.player.radius) {
-                // Trigger Magnet: All EXP dots start following
-                this.experienceDots.forEach(exp => exp.isFollowing = true);
-                this.magnetDots.splice(index, 1);
-            }
-        });
-
-        // Gold Dots
-        this.goldDots.forEach((dot, index) => {
-            dot.update(this.player.x, this.player.y);
-            const dx = this.player.x - dot.x;
-            const dy = this.player.y - dot.y;
-            const distSq = dx * dx + dy * dy;
-            
-            if (distSq < this.player.radius * this.player.radius) {
-                this.player.gold++;
-                this.ui.updateGold(this.player.gold);
-                this.goldDots.splice(index, 1);
-            }
-        });
-
-        // Heal Dots
-        this.healDots.forEach((dot, index) => {
-            dot.update(this.player.x, this.player.y);
-            
             if (dot.dead) {
-                this.healDots.splice(index, 1);
-                return;
+                this.pickups.splice(i, 1);
+                continue;
             }
 
             const dx = this.player.x - dot.x;
             const dy = this.player.y - dot.y;
             const distSq = dx * dx + dy * dy;
-            
+
             if (distSq < this.player.radius * this.player.radius) {
-                this.player.healFull();
-                this.healDots.splice(index, 1);
+                if (dot.type === 'exp') {
+                    const leveledUp = this.player.gainExperience(dot.value);
+                    if (leveledUp) {
+                        this.pendingUpgrades++;
+                        this.isPaused = true;
+                        this.ui.showUpgradeScreen();
+                    }
+                } else if (dot.type === 'magnet') {
+                    // Trigger Magnet: All EXP dots start following
+                    this.pickups.forEach(p => {
+                        if (p.type === 'exp') p.isFollowing = true;
+                    });
+                } else if (dot.type === 'gold') {
+                    this.player.gold++;
+                    this.ui.updateGold(this.player.gold);
+                } else if (dot.type === 'heal') {
+                    this.player.healFull();
+                }
+                this.pickups.splice(i, 1);
             }
-        });
+        }
 
         // Enemy AI & Collisions
         const now = Date.now();
@@ -750,11 +716,17 @@ class GameEngine {
                    e.y > viewTop - 50 && e.y < viewBottom + 50;
         };
 
-        this.experienceDots.forEach(dot => {
-            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('expDot'));
-        });
-        this.healDots.forEach(dot => {
-            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('healDot'));
+        // Render Pickups
+        this.pickups.forEach(dot => {
+            if (isVisible(dot)) {
+                let sprite;
+                if (dot.type === 'exp') sprite = this.sprites.get('expDot');
+                else if (dot.type === 'heal') sprite = this.sprites.get('healDot');
+                else if (dot.type === 'magnet') sprite = this.sprites.get('magnet');
+                else if (dot.type === 'gold') sprite = this.sprites.get('gold');
+                
+                dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
+            }
         });
         
         this.player.draw(this.ctx, this.centerX, this.centerY, vSize, vSize, this.sprites.get('player'));
@@ -792,14 +764,6 @@ class GameEngine {
             e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
         });
         
-        // Render Dots
-        this.magnetDots.forEach(dot => {
-            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('magnet'));
-        });
-        this.goldDots.forEach(dot => {
-            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('gold'));
-        });
-
         this.projectiles.forEach(p => {
             if (isVisible(p)) p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('projectile'));
         });
