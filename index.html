@@ -50,12 +50,13 @@
         let enemies = [];
         let startTime = Date.now();
         let lastSpawnTime = 0;
-        const spawnInterval = 1000; // ms
+        const spawnInterval = 500; // ms
 
         // Constants for Movement & Acceleration
-        const MAX_SPEED = 5;
-        const MIN_SPEED = 1;
-        const MAX_ACCEL_DIST = 500; // Distance at which they start accelerating faster
+        const MAX_SPEED = 3;
+        const MIN_SPEED = 0.5;
+        const MAX_ACCEL_DIST = 500;
+        const PLAYER_RADIUS = 20;
 
         class Enemy {
             constructor() {
@@ -80,23 +81,44 @@
                 this.size = 15;
                 this.color = '#ff003c'; // Neon Red
                 this.glow = '#ff003c';
+                this.stopped = false;
             }
 
             update() {
+                if (this.stopped) return;
+
                 const dx = centerX - this.x;
                 const dy = centerY - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
 
-                // Movement Logic: Simple vector math
-                // The closer they are, the faster they move, capped at MAX_SPEED
-                // Logic: Speed is inversely proportional to distance within a range
-                // We'll use a simple linear interpolation that increases speed as distance decreases
-                let speed = MIN_SPEED + (1 - Math.min(distance, MAX_ACCEL_DIST) / MAX_ACCEL_DIST) * (MAX_SPEED - MIN_SPEED);
+                // Collision with player
+                if (distanceToPlayer < PLAYER_RADIUS + this.size / 2) {
+                    this.stopped = true;
+                    return;
+                }
+
+                // Collision with other enemies (to prevent overlap)
+                for (let other of enemies) {
+                    if (other === this) continue;
+                    const edx = other.x - this.x;
+                    const edy = other.y - this.y;
+                    const distToEnemy = Math.sqrt(edx * edx + edy * edy);
+                    
+                    if (distToEnemy < this.size) {
+                        // If the other enemy is closer to the center or already stopped, stop this one
+                        const otherDistToPlayer = Math.sqrt(Math.pow(centerX - other.x, 2) + Math.pow(centerY - other.y, 2));
+                        if (other.stopped || otherDistToPlayer < distanceToPlayer) {
+                            this.stopped = true;
+                            return;
+                        }
+                    }
+                }
+
+                let speed = MIN_SPEED + (1 - Math.min(distanceToPlayer, MAX_ACCEL_DIST) / MAX_ACCEL_DIST) * (MAX_SPEED - MIN_SPEED);
                 
-                // Normalizing the vector and applying speed
-                if (distance > 0) {
-                    this.x += (dx / distance) * speed;
-                    this.y += (dy / distance) * speed;
+                if (distanceToPlayer > 0) {
+                    this.x += (dx / distanceToPlayer) * speed;
+                    this.y += (dy / distanceToPlayer) * speed;
                 }
             }
 
@@ -144,13 +166,7 @@
             spawnEnemy();
             enemies.forEach(enemy => enemy.update());
             
-            // Cleanup: remove enemies that reached the center (optional for prototype)
-            // For now, let's keep them so they "hit" the player
-            enemies = enemies.filter(enemy => {
-                const dx = centerX - enemy.x;
-                const dy = centerY - enemy.y;
-                return Math.sqrt(dx * dx + dy * dy) > 5;
-            });
+            // Enemies no longer removed when they reach center to allow "piling up"
 
             timeDisplay.innerText = Math.floor((Date.now() - startTime) / 1000);
         };
