@@ -128,8 +128,8 @@ class GameEngine {
     }
 
     resize() {
-        this.width = canvas.width = window.innerWidth;
-        this.height = canvas.height = window.innerHeight;
+        this.width = this.canvas.width = window.innerWidth;
+        this.height = this.canvas.height = window.innerHeight;
         
         // Calculate scale to fit 500x500 viewport
         const viewSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
