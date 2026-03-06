@@ -5,12 +5,16 @@ import { Projectile } from './src/Projectile.js';
 import { ExperienceDot } from './src/ExperienceDot.js';
 import { HealDot } from './src/HealDot.js';
 import { UIManager } from './src/UIManager.js';
+import { SpriteManager } from './src/SpriteManager.js';
+import { SpatialGrid } from './src/SpatialGrid.js';
 
 class GameEngine {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
         this.ui = new UIManager();
+        this.sprites = new SpriteManager();
+        this.grid = new SpatialGrid(CONSTANTS.WORLD.WORLD_SIZE, 100);
 
         this.width = 0;
         this.height = 0;
@@ -72,9 +76,69 @@ class GameEngine {
             });
         });
 
+        this.initSprites();
         this.resize();
         this.ui.showStartScreen();
         this.loop();
+    }
+
+    initSprites() {
+        const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+
+        // Player Sprite
+        const pSize = (CONSTANTS.PLAYER.RADIUS + padding) * 2;
+        this.sprites.preRender('player', pSize, pSize, (ctx, cx, cy) => {
+            ctx.strokeStyle = CONSTANTS.PLAYER.COLOR;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = CONSTANTS.PLAYER.COLOR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.PLAYER.RADIUS, 0, Math.PI * 2);
+            ctx.stroke();
+        });
+
+        // Enemy Sprite
+        const eSize = (CONSTANTS.ENEMY.SIZE + padding) * 2;
+        this.sprites.preRender('enemy', eSize, eSize, (ctx, cx, cy) => {
+            ctx.strokeStyle = CONSTANTS.ENEMY.COLOR;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONSTANTS.ENEMY.COLOR;
+            ctx.strokeRect(cx - CONSTANTS.ENEMY.SIZE / 2, cy - CONSTANTS.ENEMY.SIZE / 2, CONSTANTS.ENEMY.SIZE, CONSTANTS.ENEMY.SIZE);
+        });
+
+        // Projectile Sprite
+        const prSize = (CONSTANTS.PROJECTILE.SIZE + padding) * 2;
+        this.sprites.preRender('projectile', prSize, prSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.PROJECTILE.COLOR;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = CONSTANTS.PROJECTILE.COLOR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.PROJECTILE.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Exp Dot Sprite
+        const exSize = (CONSTANTS.EXPERIENCE.SIZE + padding) * 2;
+        this.sprites.preRender('expDot', exSize, exSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.EXPERIENCE.COLOR;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = CONSTANTS.EXPERIENCE.COLOR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.EXPERIENCE.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Heal Dot Sprite
+        const hSize = (CONSTANTS.HEAL.SIZE + padding) * 2;
+        this.sprites.preRender('healDot', hSize, hSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.HEAL.COLOR;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONSTANTS.HEAL.COLOR;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.HEAL.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
 
     applyUpgrade(type) {
@@ -131,7 +195,7 @@ class GameEngine {
         this.width = this.canvas.width = window.innerWidth;
         this.height = this.canvas.height = window.innerHeight;
         
-        // Calculate scale to fit 500x500 viewport
+        // Calculate scale to fit viewport
         const viewSize = CONSTANTS.WORLD.VIEWPORT_SIZE;
         this.scale = Math.min(this.width / viewSize, this.height / viewSize);
         
@@ -155,15 +219,16 @@ class GameEngine {
         const now = Date.now();
         if (now - this.lastAttackTime > this.player.cooldown) {
             // Find enemies in range
+            const rangeSq = this.player.range * this.player.range;
             const enemiesInRange = this.enemies
                 .map(enemy => {
                     const dx = enemy.x - this.player.x;
                     const dy = enemy.y - this.player.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    return { enemy, dist };
+                    const distSq = dx * dx + dy * dy;
+                    return { enemy, distSq };
                 })
-                .filter(item => item.dist < this.player.range)
-                .sort((a, b) => a.dist - b.dist);
+                .filter(item => item.distSq < rangeSq)
+                .sort((a, b) => a.distSq - b.distSq);
 
             if (enemiesInRange.length > 0) {
                 // Shoot at multiple targets if available
@@ -184,6 +249,10 @@ class GameEngine {
         this.handleAutoAttack();
         this.spawnEnemy();
 
+        // Spatial Grid Update
+        this.grid.clear();
+        this.enemies.forEach(e => this.grid.insert(e));
+
         // Projectiles
         this.projectiles.forEach((p, index) => {
             p.update();
@@ -191,11 +260,15 @@ class GameEngine {
                 this.projectiles.splice(index, 1);
                 return;
             }
-            this.enemies.forEach(enemy => {
+            
+            // Optimization: Only check nearby enemies
+            const nearbyEnemies = this.grid.getNearby(p.x, p.y);
+            nearbyEnemies.forEach(enemy => {
                 const dx = p.x - enemy.x;
                 const dy = p.y - enemy.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < enemy.size / 2 + p.size) {
+                const distSq = dx * dx + dy * dy;
+                const minDist = (enemy.size / 2 + p.size);
+                if (distSq < minDist * minDist) {
                     enemy.health -= this.player.projectileDamage;
                     p.dead = true;
                     if (enemy.health <= 0) {
@@ -216,9 +289,9 @@ class GameEngine {
             dot.update(this.player.x, this.player.y);
             const dx = this.player.x - dot.x;
             const dy = this.player.y - dot.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const distSq = dx * dx + dy * dy;
             
-            if (dist < this.player.radius) {
+            if (distSq < this.player.radius * this.player.radius) {
                 const leveledUp = this.player.gainExperience(dot.value);
                 if (leveledUp) {
                     this.pendingUpgrades++;
@@ -234,19 +307,22 @@ class GameEngine {
             dot.update(this.player.x, this.player.y);
             const dx = this.player.x - dot.x;
             const dy = this.player.y - dot.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const distSq = dx * dx + dy * dy;
             
-            if (dist < this.player.radius) {
+            if (distSq < this.player.radius * this.player.radius) {
                 this.player.healFull();
                 this.healDots.splice(index, 1);
             }
         });
 
         // Enemy AI & Collisions
+        const now = Date.now();
         this.enemies.forEach(enemy => {
             const dx = this.player.x - enemy.x;
             const dy = this.player.y - enemy.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const distSq = dx * dx + dy * dy;
+            const dist = Math.sqrt(distSq);
+            
             const speed = CONSTANTS.ENEMY.MIN_SPEED + (1 - Math.min(dist, CONSTANTS.ENEMY.MAX_ACCEL_DIST) / CONSTANTS.ENEMY.MAX_ACCEL_DIST) * (CONSTANTS.ENEMY.MAX_SPEED - CONSTANTS.ENEMY.MIN_SPEED);
             
             if (dist > 0) {
@@ -255,40 +331,36 @@ class GameEngine {
             }
 
             // Enemy vs Player collision & Damage
-            const pDist = Math.sqrt((enemy.x - this.player.x)**2 + (enemy.y - this.player.y)**2);
             const minPDist = this.player.radius + enemy.size / 2;
-            if (pDist < minPDist && pDist > 0) {
-                enemy.x = this.player.x + ((enemy.x - this.player.x) / pDist) * minPDist;
-                enemy.y = this.player.y + ((enemy.y - this.player.y) / pDist) * minPDist;
+            if (distSq < minPDist * minPDist && dist > 0) {
+                enemy.x = this.player.x + ((enemy.x - this.player.x) / dist) * minPDist;
+                enemy.y = this.player.y + ((enemy.y - this.player.y) / dist) * minPDist;
 
-                const now = Date.now();
                 if (!enemy.lastAttackTime) enemy.lastAttackTime = 0;
                 if (now - enemy.lastAttackTime > CONSTANTS.ENEMY.ATTACK_COOLDOWN) {
                     this.player.takeDamage(CONSTANTS.ENEMY.DAMAGE);
                     enemy.lastAttackTime = now;
                 }
             }
-        });
 
-        // Enemy vs Enemy collisions
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < this.enemies.length; j++) {
-                for (let k = j + 1; k < this.enemies.length; k++) {
-                    const e1 = this.enemies[j];
-                    const e2 = this.enemies[k];
-                    const dx = e1.x - e2.x;
-                    const dy = e1.y - e2.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < e1.size && dist > 0) {
-                        const overlap = (e1.size - dist) / 2;
-                        e1.x += (dx / dist) * overlap;
-                        e1.y += (dy / dist) * overlap;
-                        e2.x -= (dx / dist) * overlap;
-                        e2.y -= (dy / dist) * overlap;
-                    }
+            // Enemy vs Enemy collisions (using Grid)
+            const nearby = this.grid.getNearby(enemy.x, enemy.y);
+            nearby.forEach(other => {
+                if (enemy === other) return;
+                const edx = enemy.x - other.x;
+                const edy = enemy.y - other.y;
+                const edistSq = edx * edx + edy * edy;
+                const minDist = enemy.size;
+                if (edistSq < minDist * minDist && edistSq > 0) {
+                    const edist = Math.sqrt(edistSq);
+                    const overlap = (minDist - edist) / 2;
+                    enemy.x += (edx / edist) * overlap;
+                    enemy.y += (edy / edist) * overlap;
+                    other.x -= (edx / edist) * overlap;
+                    other.y -= (edy / edist) * overlap;
                 }
-            }
-        }
+            });
+        });
 
         const survivalTime = Math.floor((Date.now() - this.startTime) / 1000);
         this.ui.updateTime(survivalTime);
@@ -312,6 +384,13 @@ class GameEngine {
         this.ctx.save();
         this.ctx.scale(this.scale, this.scale);
 
+        const vWidth = this.width / this.scale;
+        const vHeight = this.height / this.scale;
+        const viewLeft = this.player.x - this.centerX;
+        const viewRight = this.player.x + this.centerX;
+        const viewTop = this.player.y - this.centerY;
+        const viewBottom = this.player.y + this.centerY;
+
         // Render World Border
         const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
         this.ctx.strokeStyle = '#333';
@@ -331,10 +410,6 @@ class GameEngine {
             if (sx < 0) sx += CONSTANTS.WORLD.WORLD_SIZE;
             if (sy < 0) sy += CONSTANTS.WORLD.WORLD_SIZE;
             
-            // Draw stars relative to the game units viewport
-            const vWidth = this.width / this.scale;
-            const vHeight = this.height / this.scale;
-            
             if (sx < vWidth && sy < vHeight) {
                 this.ctx.globalAlpha = star.opacity;
                 this.ctx.beginPath();
@@ -344,14 +419,28 @@ class GameEngine {
         });
         this.ctx.globalAlpha = 1.0;
 
-        this.experienceDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
-        this.healDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
+        // Frustum Culling helper
+        const isVisible = (e) => {
+            return e.x > viewLeft - 50 && e.x < viewRight + 50 &&
+                   e.y > viewTop - 50 && e.y < viewBottom + 50;
+        };
+
+        this.experienceDots.forEach(dot => {
+            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('expDot'));
+        });
+        this.healDots.forEach(dot => {
+            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('healDot'));
+        });
         
-        // Pass virtual dimensions to draw UI elements like health bar
-        this.player.draw(this.ctx, this.centerX, this.centerY, this.width / this.scale, this.height / this.scale);
+        this.player.draw(this.ctx, this.centerX, this.centerY, vWidth, vHeight, this.sprites.get('player'));
         
-        this.enemies.forEach(e => e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
-        this.projectiles.forEach(p => p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
+        this.enemies.forEach(e => {
+            if (isVisible(e)) e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('enemy'));
+        });
+        
+        this.projectiles.forEach(p => {
+            if (isVisible(p)) p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('projectile'));
+        });
         
         this.ctx.restore();
     }

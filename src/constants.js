@@ -55,6 +55,7 @@ export const CONSTANTS = {
         STAR_COUNT: 800,
         WORLD_SIZE: 4000,
         VIEWPORT_SIZE: 1000,
-        STAR_COLOR: '#666'
+        STAR_COLOR: '#666',
+        SPRITE_PADDING: 20 // Extra space for neon glow
     }
 };

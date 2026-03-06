@@ -55,18 +55,22 @@ export class Enemy {
         this.glow = CONSTANTS.ENEMY.COLOR;
     }
 
-    draw(ctx, playerX, playerY, centerX, centerY) {
-        ctx.save();
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = this.glow;
-        
+    draw(ctx, playerX, playerY, centerX, centerY, sprite) {
         // Render relative to player's center view
         const screenX = this.x - playerX + centerX;
         const screenY = this.y - playerY + centerY;
         
-        ctx.strokeRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
-        ctx.restore();
+        if (sprite) {
+            const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+            ctx.drawImage(sprite, screenX - this.size/2 - padding, screenY - this.size/2 - padding);
+        } else {
+            ctx.save();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = this.glow;
+            ctx.strokeRect(screenX - this.size/2, screenY - this.size/2, this.size, this.size);
+            ctx.restore();
+        }
     }
 }

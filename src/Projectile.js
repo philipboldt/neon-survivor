@@ -39,17 +39,22 @@ export class Projectile {
         if (this.life <= 0) this.dead = true;
     }
 
-    draw(ctx, playerX, playerY, centerX, centerY) {
-        ctx.save();
+    draw(ctx, playerX, playerY, centerX, centerY, sprite) {
         const screenX = this.x - playerX + centerX;
         const screenY = this.y - playerY + centerY;
         
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-        ctx.beginPath();
-        ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        if (sprite) {
+            const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+            ctx.drawImage(sprite, screenX - this.size - padding, screenY - this.size - padding);
+        } else {
+            ctx.save();
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
     }
 }

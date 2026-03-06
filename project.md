@@ -9,7 +9,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Centralized constants (`constants.js`)
   - [x] Game Engine for state and loop management
 - [x] Fullscreen Canvas & Rendering
-  - [x] Fixed 500x500 game unit viewport scaling (Dynamic Zoom)
+  - [x] Fixed 1000x1000 game unit viewport scaling (Dynamic Zoom)
   - [x] Consistent gameplay across different screen sizes/resolutions
 - [x] Player Movement & World Shift
   - [x] Player fixed in center of the screen
@@ -23,18 +23,15 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Neon Aesthetics (Glow effects)
   - [x] Infinite Starfield (Background dots) for movement reference
   - [x] Spacey font ('Orbitron')
-
 - [x] Weapon System
   - [x] Player Range (visualized with dashed circle)
   - [x] Automatic targeting of nearest enemy
   - [x] Projectiles (Blue glowing circles)
   - [x] Enemy Health and Damage mechanics
-
 - [x] World Boundaries
-  - [x] Strict 2000x2000 world limits
+  - [x] Strict 4000x4000 world limits
   - [x] Player and Enemy movement clamped to world size
   - [x] Visual border rendering
-
 - [x] Player Health & Damage
   - [x] 15 HP for player
   - [x] Neon green health bar (top center)
@@ -47,13 +44,16 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Neon blue experience bar (bottom center)
   - [x] Level up mechanic with increasing requirements
   - [x] Choice-based upgrade system (+1 Attack, +1 Damage)
-
-## Tech Stack
 - [x] Game Flow & UI
   - [x] Start Screen with Highscores
   - [x] Pause functionality (SPACE key)
   - [x] Game Over screen with stats and restart
   - [x] Highscore logic (Local Storage)
+- [x] Performance Optimizations
+  - [x] Sprite Pre-rendering (offscreen canvases for neon glow)
+  - [x] Squared Distance calculations (avoiding `Math.sqrt`)
+  - [x] Spatial Partitioning (Grid system for O(n) collisions)
+  - [x] Frustum Culling (skip drawing off-screen entities)
 
 ## Tech Stack
 - HTML5 Canvas

@@ -56,7 +56,7 @@ export class Player {
         this.experienceToNextLevel = Math.floor(this.experienceToNextLevel * 1.5);
     }
 
-    draw(ctx, centerX, centerY, width, height) {
+    draw(ctx, centerX, centerY, width, height, sprite) {
         this.drawHealthBar(ctx, width);
         this.drawExpBar(ctx, width, height);
 
@@ -81,16 +81,20 @@ export class Player {
         ctx.restore();
 
         // Player Circle
-        ctx.save();
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = this.color;
-        
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, this.radius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+        if (sprite) {
+            const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+            ctx.drawImage(sprite, centerX - this.radius - padding, centerY - this.radius - padding);
+        } else {
+            ctx.save();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, this.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        }
     }
 
     drawHealthBar(ctx, screenWidth) {

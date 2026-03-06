@@ -14,13 +14,14 @@ export class ExperienceDot {
     update(playerX, playerY) {
         const dx = playerX - this.x;
         const dy = playerY - this.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
 
-        if (dist < CONSTANTS.PLAYER.COLLECT_RANGE) {
+        if (distSq < CONSTANTS.PLAYER.COLLECT_RANGE * CONSTANTS.PLAYER.COLLECT_RANGE) {
             this.isFollowing = true;
         }
 
         if (this.isFollowing) {
+            const dist = Math.sqrt(distSq);
             if (dist > 0) {
                 this.x += (dx / dist) * this.speed;
                 this.y += (dy / dist) * this.speed;
@@ -28,17 +29,22 @@ export class ExperienceDot {
         }
     }
 
-    draw(ctx, playerX, playerY, centerX, centerY) {
-        ctx.save();
+    draw(ctx, playerX, playerY, centerX, centerY, sprite) {
         const screenX = this.x - playerX + centerX;
         const screenY = this.y - playerY + centerY;
         
-        ctx.fillStyle = this.color;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = this.color;
-        ctx.beginPath();
-        ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+        if (sprite) {
+            const padding = CONSTANTS.WORLD.SPRITE_PADDING;
+            ctx.drawImage(sprite, screenX - this.size - padding, screenY - this.size - padding);
+        } else {
+            ctx.save();
+            ctx.fillStyle = this.color;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
     }
 }
