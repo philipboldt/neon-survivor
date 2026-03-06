@@ -155,24 +155,6 @@ const render = () => {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 
-    // Grid for visual reference of movement
-    const gridSize = 50;
-    const startX = centerX - (playerX % gridSize);
-    const startY = centerY - (playerY % gridSize);
-    
-    ctx.strokeStyle = '#222';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    for (let x = startX - gridSize; x < width + gridSize; x += gridSize) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-    }
-    for (let y = startY - gridSize; y < height + gridSize; y += gridSize) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-    }
-    ctx.stroke();
-
     drawPlayer();
     enemies.forEach(enemy => enemy.draw());
 };

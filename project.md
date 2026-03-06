@@ -15,7 +15,6 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)
 - [x] Visuals
   - [x] Neon Aesthetics (Glow effects)
-  - [x] Infinite Grid for movement reference
 
 ## Tech Stack
 - HTML5 Canvas
