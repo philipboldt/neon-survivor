@@ -585,6 +585,12 @@ class GameEngine {
         // Heal Dots
         this.healDots.forEach((dot, index) => {
             dot.update(this.player.x, this.player.y);
+            
+            if (dot.dead) {
+                this.healDots.splice(index, 1);
+                return;
+            }
+
             const dx = this.player.x - dot.x;
             const dy = this.player.y - dot.y;
             const distSq = dx * dx + dy * dy;

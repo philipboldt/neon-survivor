@@ -86,7 +86,8 @@ export const CONSTANTS = {
     },
     HEAL: {
         SIZE: 4,
-        COLOR: '#39ff14' // Neon Green
+        COLOR: '#39ff14', // Neon Green
+        LIFESPAN: 30000 // 30 seconds
     },
     WORLD: {
         STAR_COUNT: 800,

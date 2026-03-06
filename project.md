@@ -48,7 +48,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Enemies drop neon blue experience dots on death
   - [x] Magnet Dot: Collected from Boxes, triggers immediate collection of ALL EXP dots on map.
   - [x] Gold Dot: Collected from Boxes, increases player gold counter.
-  - [x] 5% chance for enemies to drop a neon green heal dot (heals player fully)
+  - [x] 5% chance for enemies to drop a neon green heal dot (heals player fully). Dots vanish after 30 seconds.
   - [x] Player has a collection range (visualized with dark blue circle)
   - [x] Experience/Heal dots fly to player when in range
   - [x] Neon blue experience bar (bottom center)

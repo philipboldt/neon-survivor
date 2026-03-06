@@ -8,9 +8,16 @@ export class HealDot {
         this.color = CONSTANTS.HEAL.COLOR;
         this.speed = CONSTANTS.PLAYER.SPEED * CONSTANTS.EXPERIENCE.SPEED_MULTIPLIER;
         this.isFollowing = false;
+        this.createdAt = Date.now();
+        this.dead = false;
     }
 
     update(playerX, playerY) {
+        if (Date.now() - this.createdAt > CONSTANTS.HEAL.LIFESPAN) {
+            this.dead = true;
+            return;
+        }
+
         const dx = playerX - this.x;
         const dy = playerY - this.y;
         const distSq = dx * dx + dy * dy;
