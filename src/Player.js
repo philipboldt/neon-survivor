@@ -16,6 +16,11 @@ export class Player {
         if (keys['KeyS'] || keys['ArrowDown']) this.y += this.speed;
         if (keys['KeyA'] || keys['ArrowLeft']) this.x -= this.speed;
         if (keys['KeyD'] || keys['ArrowRight']) this.x += this.speed;
+
+        // Clamp to world boundaries
+        const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
+        this.x = Math.max(-halfSize + this.radius, Math.min(halfSize - this.radius, this.x));
+        this.y = Math.max(-halfSize + this.radius, Math.min(halfSize - this.radius, this.y));
     }
 
     draw(ctx, centerX, centerY) {

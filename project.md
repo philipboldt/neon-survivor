@@ -27,6 +27,11 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Projectiles (Blue glowing circles)
   - [x] Enemy Health and Damage mechanics
 
+- [x] World Boundaries
+  - [x] Strict 2000x2000 world limits
+  - [x] Player and Enemy movement clamped to world size
+  - [x] Visual border rendering
+
 ## Tech Stack
 - HTML5 Canvas
 - Modern JavaScript (ES6+, Modules)

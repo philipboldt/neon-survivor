@@ -160,6 +160,17 @@ class GameEngine {
         this.ctx.fillStyle = '#000';
         this.ctx.fillRect(0, 0, this.width, this.height);
 
+        // Render World Border
+        const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
+        this.ctx.strokeStyle = '#333';
+        this.ctx.lineWidth = 5;
+        this.ctx.strokeRect(
+            -halfSize - this.player.x + this.centerX,
+            -halfSize - this.player.y + this.centerY,
+            CONSTANTS.WORLD.WORLD_SIZE,
+            CONSTANTS.WORLD.WORLD_SIZE
+        );
+
         // Stars
         this.ctx.fillStyle = CONSTANTS.WORLD.STAR_COLOR;
         this.stars.forEach(star => {
