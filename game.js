@@ -9,6 +9,7 @@ const timeDisplay = document.getElementById('time');
 
 let width, height, centerX, centerY;
 let enemies = [];
+let projectiles = [];
 let startTime = Date.now();
 let lastSpawnTime = 0;
 const spawnInterval = 500; // ms
@@ -19,10 +20,13 @@ const MIN_SPEED = 0.4;
 const MAX_ACCEL_DIST = 500;
 const PLAYER_RADIUS = 20;
 
-// Player World Position
+// Player Stats & Weapon
 let playerX = 0;
 let playerY = 0;
 const PLAYER_SPEED = 5;
+const PLAYER_RANGE = 250;
+const WEAPON_COOLDOWN = 1000; // 1 second
+let lastAttackTime = 0;
 
 // Starfield (Background dots)
 const stars = [];
@@ -43,6 +47,45 @@ const keys = {};
 window.addEventListener('keydown', (e) => keys[e.code] = true);
 window.addEventListener('keyup', (e) => keys[e.code] = false);
 
+class Projectile {
+    constructor(startX, startY, targetX, targetY) {
+        this.x = startX;
+        this.y = startY;
+        
+        const dx = targetX - startX;
+        const dy = targetY - startY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        this.speed = 7;
+        this.vx = (dx / dist) * this.speed;
+        this.vy = (dy / dist) * this.speed;
+        
+        this.size = 4;
+        this.color = '#00d2ff';
+        this.life = 100; // Frames or distance
+    }
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+    }
+
+    draw() {
+        ctx.save();
+        const screenX = this.x - playerX + centerX;
+        const screenY = this.y - playerY + centerY;
+        
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
 class Enemy {
     constructor() {
         // Spawn randomly relative to the player
@@ -52,9 +95,9 @@ class Enemy {
         this.y = playerY + Math.sin(angle) * distance;
 
         this.size = 15;
+        this.health = 1;
         this.color = '#ff003c'; // Neon Red
         this.glow = '#ff003c';
-        this.stopped = false;
     }
 
     draw() {
@@ -81,6 +124,17 @@ const resize = () => {
 };
 
 const drawPlayer = () => {
+    // Range Indicator
+    ctx.save();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, PLAYER_RANGE, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+
+    // Player
     ctx.save();
     ctx.strokeStyle = '#00d2ff'; // Neon Blue
     ctx.lineWidth = 3;
@@ -108,9 +162,55 @@ const update = () => {
     if (keys['KeyA'] || keys['ArrowLeft']) playerX -= PLAYER_SPEED;
     if (keys['KeyD'] || keys['ArrowRight']) playerX += PLAYER_SPEED;
 
+    // Automatic Attack
+    const now = Date.now();
+    if (now - lastAttackTime > WEAPON_COOLDOWN) {
+        // Find nearest enemy in range
+        let nearestEnemy = null;
+        let minDist = PLAYER_RANGE;
+
+        enemies.forEach(enemy => {
+            const dx = enemy.x - playerX;
+            const dy = enemy.y - playerY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist) {
+                minDist = dist;
+                nearestEnemy = enemy;
+            }
+        });
+
+        if (nearestEnemy) {
+            projectiles.push(new Projectile(playerX, playerY, nearestEnemy.x, nearestEnemy.y));
+            lastAttackTime = now;
+        }
+    }
+
     spawnEnemy();
     
-    // 1. Basic Movement (towards the player)
+    // 1. Projectiles Update
+    projectiles.forEach((p, index) => {
+        p.update();
+        if (p.life <= 0) {
+            projectiles.splice(index, 1);
+            return;
+        }
+
+        // Projectile vs Enemy Collision
+        enemies.forEach((enemy, eIndex) => {
+            const dx = p.x - enemy.x;
+            const dy = p.y - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < enemy.size / 2 + p.size) {
+                enemy.health -= 1;
+                p.life = 0; // Destroy projectile
+            }
+        });
+    });
+
+    // 2. Enemy death
+    enemies = enemies.filter(enemy => enemy.health > 0);
+
+    // 3. Enemy Movement (towards the player)
     enemies.forEach(enemy => {
         const dx = playerX - enemy.x;
         const dy = playerY - enemy.y;
@@ -124,7 +224,7 @@ const update = () => {
         }
     });
 
-    // 2. Collision Resolution (Enemies vs Enemies)
+    // 4. Collision Resolution (Enemies vs Enemies)
     for (let i = 0; i < 3; i++) {
         for (let j = 0; j < enemies.length; j++) {
             for (let k = j + 1; k < enemies.length; k++) {
@@ -148,7 +248,7 @@ const update = () => {
         }
     }
 
-    // 3. Collision Resolution (Enemies vs Player)
+    // 5. Collision Resolution (Enemies vs Player)
     enemies.forEach(enemy => {
         const dx = enemy.x - playerX;
         const dy = enemy.y - playerY;
@@ -169,18 +269,13 @@ const render = () => {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 
-    // Render Stars (Infinite field using modulo wrapping)
+    // Render Stars
     ctx.fillStyle = '#666';
     stars.forEach(star => {
-        // Calculate screen position with wrapping
         let sx = (star.x - playerX + centerX) % WORLD_SIZE;
         let sy = (star.y - playerY + centerY) % WORLD_SIZE;
-        
-        // Ensure positive coordinates for modulo
         if (sx < 0) sx += WORLD_SIZE;
         if (sy < 0) sy += WORLD_SIZE;
-        
-        // Draw only if on screen (with a small buffer)
         if (sx < width && sy < height) {
             ctx.globalAlpha = star.opacity;
             ctx.beginPath();
@@ -192,6 +287,7 @@ const render = () => {
 
     drawPlayer();
     enemies.forEach(enemy => enemy.draw());
+    projectiles.forEach(p => p.draw());
 };
 
 const loop = () => {

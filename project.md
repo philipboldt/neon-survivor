@@ -17,13 +17,20 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Neon Aesthetics (Glow effects)
   - [x] Infinite Starfield (Background dots) for movement reference
 
+- [x] Weapon System
+  - [x] Player Range (visualized with dashed circle)
+  - [x] Automatic targeting of nearest enemy
+  - [x] Projectiles (Blue glowing circles)
+  - [x] Enemy Health and Damage mechanics
+
 ## Tech Stack
 - HTML5 Canvas
 - Modern JavaScript (ES6+, Modules)
 - Vanilla CSS
 
 ## Features
-- **Player:** Blue glowing neon circle fixed at the center.
-- **Enemies:** Red glowing neon squares that chase the player in the world space.
+- **Player:** Blue glowing neon circle fixed at the center. Equipped with a range-based auto-attack.
+- **Enemies:** Red glowing neon squares with 1 HP. They are destroyed upon being hit.
+- **Weapon:** Shoots a blue projectile every second at the nearest enemy in range.
 - **Movement:** The player controls the "camera" by moving through the world.
-- **Mechanics:** Enemies accelerate as they approach the player.
+- **Mechanics:** Enemies accelerate as they approach the player. Projectiles deal 1 damage.
