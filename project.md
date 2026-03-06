@@ -54,7 +54,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Neon blue experience bar (bottom center)
   - [x] Level up mechanic with increasing requirements (Starts at 5 EXP, 1.5x multiplier)
   - [x] Choice-based upgrade system (+1 Attack, +1 Damage, Circling Ball)
-  - [x] Circling Ball Upgrade: Orbitals rotate at 3/4 range, dealing 1 damage on contact. Multiple upgrades add more balls (equally distributed).
+  - [x] Circling Ball Upgrade: Orbitals rotate at 3/4 range, dealing 1 damage on contact. Multiple upgrades add more balls (equally distributed). Now correctly damages Boxes and Mini Bosses using dynamic entity sizes.
 - [x] Game Flow & UI
   - [x] Neon high-contrast aesthetic
   - [x] HUD showing HP, Experience, Time, and Gold

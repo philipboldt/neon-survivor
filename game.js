@@ -446,24 +446,32 @@ class GameEngine {
                 const ox = this.player.x + Math.cos(angle) * orbitRadius;
                 const oy = this.player.y + Math.sin(angle) * orbitRadius;
 
-                // Collision with enemies
+                // Collision with enemies and boxes
                 const nearby = this.grid.getNearby(ox, oy);
-                const orbSizeSq = (CONSTANTS.ORBITAL.SIZE / 2 + CONSTANTS.ENEMY.SIZE / 2) ** 2;
 
-                nearby.forEach(enemy => {
-                    const dx = ox - enemy.x;
-                    const dy = oy - enemy.y;
-                    if (dx * dx + dy * dy < orbSizeSq) {
-                        enemy.health -= CONSTANTS.ORBITAL.DAMAGE;
-                        if (enemy.health <= 0) {
-                            if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
-                                this.healDots.push(new HealDot(enemy.x, enemy.y));
+                nearby.forEach(entity => {
+                    const dx = ox - entity.x;
+                    const dy = oy - entity.y;
+                    const minDist = (CONSTANTS.ORBITAL.SIZE / 2 + entity.size / 2);
+                    if (dx * dx + dy * dy < minDist * minDist) {
+                        entity.health -= CONSTANTS.ORBITAL.DAMAGE;
+                        if (entity.health <= 0) {
+                            if (entity instanceof Box) {
+                                if (Math.random() < 0.5) {
+                                    this.magnetDots.push(new MagnetDot(entity.x, entity.y));
+                                } else {
+                                    this.goldDots.push(new GoldDot(entity.x, entity.y));
+                                }
                             } else {
-                                const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
-                                for (let j = 0; j < dots; j++) {
-                                    const oxDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                    const oyDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                    this.experienceDots.push(new ExperienceDot(enemy.x + oxDot, enemy.y + oyDot, 1));
+                                if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
+                                    this.healDots.push(new HealDot(entity.x, entity.y));
+                                } else {
+                                    const dots = entity.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
+                                    for (let j = 0; j < dots; j++) {
+                                        const oxDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                        const oyDot = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                        this.experienceDots.push(new ExperienceDot(entity.x + oxDot, enemy.y + oyDot, 1));
+                                    }
                                 }
                             }
                         }
