@@ -85,40 +85,54 @@
             }
 
             update() {
-                if (this.stopped) return;
-
                 const dx = centerX - this.x;
                 const dy = centerY - this.y;
                 const distanceToPlayer = Math.sqrt(dx * dx + dy * dy);
 
-                // Collision with player
-                if (distanceToPlayer < PLAYER_RADIUS + this.size / 2) {
-                    this.stopped = true;
-                    return;
-                }
-
-                // Collision with other enemies (to prevent overlap)
-                for (let other of enemies) {
-                    if (other === this) continue;
-                    const edx = other.x - this.x;
-                    const edy = other.y - this.y;
-                    const distToEnemy = Math.sqrt(edx * edx + edy * edy);
-                    
-                    if (distToEnemy < this.size) {
-                        // If the other enemy is closer to the center or already stopped, stop this one
-                        const otherDistToPlayer = Math.sqrt(Math.pow(centerX - other.x, 2) + Math.pow(centerY - other.y, 2));
-                        if (other.stopped || otherDistToPlayer < distanceToPlayer) {
-                            this.stopped = true;
-                            return;
-                        }
-                    }
-                }
-
+                // 1. Movement towards center
                 let speed = MIN_SPEED + (1 - Math.min(distanceToPlayer, MAX_ACCEL_DIST) / MAX_ACCEL_DIST) * (MAX_SPEED - MIN_SPEED);
                 
                 if (distanceToPlayer > 0) {
-                    this.x += (dx / distanceToPlayer) * speed;
-                    this.y += (dy / distanceToPlayer) * speed;
+                    this.vx = (dx / distanceToPlayer) * speed;
+                    this.vy = (dy / distanceToPlayer) * speed;
+                } else {
+                    this.vx = 0;
+                    this.vy = 0;
+                }
+
+                // 2. Separation logic (Swarm effect / Jiggling)
+                // Pushing away from other enemies to prevent overlap
+                let pushX = 0;
+                let pushY = 0;
+                const separationDist = this.size * 1.1; // Slightly larger than size for "padding"
+
+                for (let other of enemies) {
+                    if (other === this) continue;
+                    const edx = this.x - other.x;
+                    const edy = this.y - other.y;
+                    const distToEnemy = Math.sqrt(edx * edx + edy * edy);
+                    
+                    if (distToEnemy < separationDist && distToEnemy > 0) {
+                        // Stronger push the closer they are
+                        const force = (separationDist - distToEnemy) / separationDist;
+                        pushX += (edx / distToEnemy) * force * 2;
+                        pushY += (edy / distToEnemy) * force * 2;
+                    }
+                }
+
+                this.x += this.vx + pushX;
+                this.y += this.vy + pushY;
+
+                // 3. Collision with player (Stay on perimeter)
+                const finalDx = centerX - this.x;
+                const finalDy = centerY - this.y;
+                const finalDist = Math.sqrt(finalDx * finalDx + finalDy * finalDy);
+                const minDist = PLAYER_RADIUS + this.size / 2;
+
+                if (finalDist < minDist) {
+                    // Push back to the perimeter
+                    this.x = centerX - (finalDx / finalDist) * minDist;
+                    this.y = centerY - (finalDy / finalDist) * minDist;
                 }
             }
 
