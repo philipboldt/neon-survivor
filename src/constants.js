@@ -1,4 +1,4 @@
-export const CONFIG = {
+export const CONSTANTS = {
     PLAYER: {
         RADIUS: 20,
         SPEED: 5,

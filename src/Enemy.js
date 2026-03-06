@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONSTANTS } from './constants.js';
 
 export class Enemy {
     constructor(playerX, playerY, width, height) {
@@ -8,10 +8,10 @@ export class Enemy {
         this.x = playerX + Math.cos(angle) * distance;
         this.y = playerY + Math.sin(angle) * distance;
 
-        this.size = CONFIG.ENEMY.SIZE;
+        this.size = CONSTANTS.ENEMY.SIZE;
         this.health = 1;
-        this.color = CONFIG.ENEMY.COLOR;
-        this.glow = CONFIG.ENEMY.COLOR;
+        this.color = CONSTANTS.ENEMY.COLOR;
+        this.glow = CONSTANTS.ENEMY.COLOR;
     }
 
     draw(ctx, playerX, playerY, centerX, centerY) {

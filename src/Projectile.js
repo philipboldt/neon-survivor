@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONSTANTS } from './constants.js';
 
 export class Projectile {
     constructor(startX, startY, targetX, targetY) {
@@ -9,13 +9,13 @@ export class Projectile {
         const dy = targetY - startY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         
-        this.speed = CONFIG.PROJECTILE.SPEED;
+        this.speed = CONSTANTS.PROJECTILE.SPEED;
         this.vx = (dx / dist) * this.speed;
         this.vy = (dy / dist) * this.speed;
         
-        this.size = CONFIG.PROJECTILE.SIZE;
-        this.color = CONFIG.PROJECTILE.COLOR;
-        this.life = CONFIG.PROJECTILE.LIFE;
+        this.size = CONSTANTS.PROJECTILE.SIZE;
+        this.color = CONSTANTS.PROJECTILE.COLOR;
+        this.life = CONSTANTS.PROJECTILE.LIFE;
     }
 
     update() {

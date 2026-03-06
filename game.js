@@ -1,4 +1,4 @@
-import { CONFIG } from './src/config.js';
+import { CONSTANTS } from './src/constants.js';
 import { Player } from './src/Player.js';
 import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
@@ -38,7 +38,7 @@ class GameEngine {
     }
 
     generateStars() {
-        const { STAR_COUNT, WORLD_SIZE } = CONFIG.WORLD;
+        const { STAR_COUNT, WORLD_SIZE } = CONSTANTS.WORLD;
         for (let i = 0; i < STAR_COUNT; i++) {
             this.stars.push({
                 x: (Math.random() - 0.5) * WORLD_SIZE,
@@ -58,7 +58,7 @@ class GameEngine {
 
     spawnEnemy() {
         const now = Date.now();
-        if (now - this.lastSpawnTime > CONFIG.ENEMY.SPAWN_INTERVAL) {
+        if (now - this.lastSpawnTime > CONSTANTS.ENEMY.SPAWN_INTERVAL) {
             this.enemies.push(new Enemy(this.player.x, this.player.y, this.width, this.height));
             this.lastSpawnTime = now;
         }
@@ -117,7 +117,7 @@ class GameEngine {
             const dx = this.player.x - enemy.x;
             const dy = this.player.y - enemy.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const speed = CONFIG.ENEMY.MIN_SPEED + (1 - Math.min(dist, CONFIG.ENEMY.MAX_ACCEL_DIST) / CONFIG.ENEMY.MAX_ACCEL_DIST) * (CONFIG.ENEMY.MAX_SPEED - CONFIG.ENEMY.MIN_SPEED);
+            const speed = CONSTANTS.ENEMY.MIN_SPEED + (1 - Math.min(dist, CONSTANTS.ENEMY.MAX_ACCEL_DIST) / CONSTANTS.ENEMY.MAX_ACCEL_DIST) * (CONSTANTS.ENEMY.MAX_SPEED - CONSTANTS.ENEMY.MIN_SPEED);
             
             if (dist > 0) {
                 enemy.x += (dx / dist) * speed;
@@ -161,12 +161,12 @@ class GameEngine {
         this.ctx.fillRect(0, 0, this.width, this.height);
 
         // Stars
-        this.ctx.fillStyle = CONFIG.WORLD.STAR_COLOR;
+        this.ctx.fillStyle = CONSTANTS.WORLD.STAR_COLOR;
         this.stars.forEach(star => {
-            let sx = (star.x - this.player.x + this.centerX) % CONFIG.WORLD.WORLD_SIZE;
-            let sy = (star.y - this.player.y + this.centerY) % CONFIG.WORLD.WORLD_SIZE;
-            if (sx < 0) sx += CONFIG.WORLD.WORLD_SIZE;
-            if (sy < 0) sy += CONFIG.WORLD.WORLD_SIZE;
+            let sx = (star.x - this.player.x + this.centerX) % CONSTANTS.WORLD.WORLD_SIZE;
+            let sy = (star.y - this.player.y + this.centerY) % CONSTANTS.WORLD.WORLD_SIZE;
+            if (sx < 0) sx += CONSTANTS.WORLD.WORLD_SIZE;
+            if (sy < 0) sy += CONSTANTS.WORLD.WORLD_SIZE;
             if (sx < this.width && sy < this.height) {
                 this.ctx.globalAlpha = star.opacity;
                 this.ctx.beginPath();

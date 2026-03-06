@@ -1,14 +1,14 @@
-import { CONFIG } from './config.js';
+import { CONSTANTS } from './constants.js';
 
 export class Player {
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.radius = CONFIG.PLAYER.RADIUS;
-        this.speed = CONFIG.PLAYER.SPEED;
-        this.range = CONFIG.PLAYER.RANGE;
-        this.color = CONFIG.PLAYER.COLOR;
-        this.cooldown = CONFIG.PLAYER.WEAPON_COOLDOWN;
+        this.radius = CONSTANTS.PLAYER.RADIUS;
+        this.speed = CONSTANTS.PLAYER.SPEED;
+        this.range = CONSTANTS.PLAYER.RANGE;
+        this.color = CONSTANTS.PLAYER.COLOR;
+        this.cooldown = CONSTANTS.PLAYER.WEAPON_COOLDOWN;
     }
 
     update(keys) {
