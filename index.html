@@ -1,43 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Neon Survivor</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Survivor Prototype</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            pointer-events: none;
+            text-shadow: 0 0 5px #fff;
+        }
+    </style>
 </head>
-
 <body>
-  <div class="game-wrap">
-    <h1 class="title">NEON SURVIVOR</h1>
-    <div class="canvas-container">
-      <canvas id="game" width="800" height="600"></canvas>
-      <div id="start-screen" class="overlay">
-        <div class="highscore-container">
-          <h2>HIGH SCORES</h2>
-          <ol class="highscore-list">
-            <li>---</li>
-            <li>---</li>
-            <li>---</li>
-          </ol>
-        </div>
-        <p class="blink">Press SPACE or Tap to start</p>
-      </div>
-      <div id="overlay" class="overlay hidden">
-        <p id="overlay-text">GAME OVER</p>
-        <button id="restart">Play again</button>
-      </div>
+    <div id="ui">
+        <h1>NEON SURVIVOR</h1>
+        <p>Survival Time: <span id="time">0</span>s</p>
     </div>
-    <div id="touch-controls" class="touch-controls">
-      <button id="btn-left" class="touch-btn">◀</button>
-      <button id="btn-shoot" class="touch-btn shoot">SHOOT</button>
-      <button id="btn-pause" class="touch-btn pause">⏸</button>
-      <button id="btn-right" class="touch-btn">▶</button>
-    </div>
-    <p class="controls">WASD to move · SPACE to start</p>
-  </div>
-  <script type="module" src="game.js"></script>
-</body>
+    <canvas id="gameCanvas"></canvas>
 
+    <script>
+        /**
+         * Neon Survivor - Functional Prototype
+         * Fullscreen, Vector Math, Acceleration, Neon Aesthetics
+         */
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const timeDisplay = document.getElementById('time');
+
+        let width, height, centerX, centerY;
+        let enemies = [];
+        let startTime = Date.now();
+        let lastSpawnTime = 0;
+        const spawnInterval = 1000; // ms
+
+        // Constants for Movement & Acceleration
+        const MAX_SPEED = 5;
+        const MIN_SPEED = 1;
+        const MAX_ACCEL_DIST = 500; // Distance at which they start accelerating faster
+
+        class Enemy {
+            constructor() {
+                // Spawn outside the visible area
+                const side = Math.floor(Math.random() * 4);
+                const margin = 50;
+
+                if (side === 0) { // Top
+                    this.x = Math.random() * width;
+                    this.y = -margin;
+                } else if (side === 1) { // Right
+                    this.x = width + margin;
+                    this.y = Math.random() * height;
+                } else if (side === 2) { // Bottom
+                    this.x = Math.random() * width;
+                    this.y = height + margin;
+                } else { // Left
+                    this.x = -margin;
+                    this.y = Math.random() * height;
+                }
+
+                this.size = 15;
+                this.color = '#ff003c'; // Neon Red
+                this.glow = '#ff003c';
+            }
+
+            update() {
+                const dx = centerX - this.x;
+                const dy = centerY - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Movement Logic: Simple vector math
+                // The closer they are, the faster they move, capped at MAX_SPEED
+                // Logic: Speed is inversely proportional to distance within a range
+                // We'll use a simple linear interpolation that increases speed as distance decreases
+                let speed = MIN_SPEED + (1 - Math.min(distance, MAX_ACCEL_DIST) / MAX_ACCEL_DIST) * (MAX_SPEED - MIN_SPEED);
+                
+                // Normalizing the vector and applying speed
+                if (distance > 0) {
+                    this.x += (dx / distance) * speed;
+                    this.y += (dy / distance) * speed;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.glow;
+                
+                ctx.strokeRect(this.x - this.size/2, this.y - this.size/2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        const resize = () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            centerX = width / 2;
+            centerY = height / 2;
+        };
+
+        const drawPlayer = () => {
+            ctx.save();
+            ctx.strokeStyle = '#00d2ff'; // Neon Blue
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00d2ff';
+            
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        const spawnEnemy = () => {
+            const now = Date.now();
+            if (now - lastSpawnTime > spawnInterval) {
+                enemies.push(new Enemy());
+                lastSpawnTime = now;
+            }
+        };
+
+        const update = () => {
+            spawnEnemy();
+            enemies.forEach(enemy => enemy.update());
+            
+            // Cleanup: remove enemies that reached the center (optional for prototype)
+            // For now, let's keep them so they "hit" the player
+            enemies = enemies.filter(enemy => {
+                const dx = centerX - enemy.x;
+                const dy = centerY - enemy.y;
+                return Math.sqrt(dx * dx + dy * dy) > 5;
+            });
+
+            timeDisplay.innerText = Math.floor((Date.now() - startTime) / 1000);
+        };
+
+        const render = () => {
+            // Background
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+
+            drawPlayer();
+            enemies.forEach(enemy => enemy.draw());
+        };
+
+        const loop = () => {
+            update();
+            render();
+            requestAnimationFrame(loop);
+        };
+
+        window.addEventListener('resize', resize);
+        resize();
+        loop();
+
+    </script>
+</body>
 </html>
