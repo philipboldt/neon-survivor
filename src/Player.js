@@ -7,10 +7,15 @@ export class Player {
         this.radius = CONSTANTS.PLAYER.RADIUS;
         this.speed = CONSTANTS.PLAYER.SPEED;
         this.range = CONSTANTS.PLAYER.RANGE;
+        this.collectRange = CONSTANTS.PLAYER.COLLECT_RANGE;
         this.color = CONSTANTS.PLAYER.COLOR;
         this.cooldown = CONSTANTS.PLAYER.WEAPON_COOLDOWN;
         this.health = CONSTANTS.PLAYER.MAX_HEALTH;
         this.maxHealth = CONSTANTS.PLAYER.MAX_HEALTH;
+
+        this.experience = 0;
+        this.experienceToNextLevel = 10;
+        this.level = 1;
     }
 
     update(keys) {
@@ -29,16 +34,40 @@ export class Player {
         this.health = Math.max(0, this.health - amount);
     }
 
+    gainExperience(amount) {
+        this.experience += amount;
+        if (this.experience >= this.experienceToNextLevel) {
+            this.levelUp();
+        }
+    }
+
+    levelUp() {
+        this.experience -= this.experienceToNextLevel;
+        this.level++;
+        this.experienceToNextLevel = Math.floor(this.experienceToNextLevel * 1.5);
+    }
+
     draw(ctx, centerX, centerY, width, height) {
         this.drawHealthBar(ctx, width);
+        this.drawExpBar(ctx, width, height);
 
-        // Range Indicator
+        // Weapon Range Indicator (grey)
         ctx.save();
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
         ctx.arc(centerX, centerY, this.range, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Collect Range Indicator (dark blue)
+        ctx.save();
+        ctx.strokeStyle = '#003366';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, this.collectRange, 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
 
@@ -76,6 +105,36 @@ export class Player {
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, WIDTH, HEIGHT);
+        ctx.restore();
+    }
+
+    drawExpBar(ctx, screenWidth, screenHeight) {
+        const { WIDTH, HEIGHT, COLOR, BG_COLOR } = CONSTANTS.PLAYER.EXP_BAR;
+        const x = (screenWidth - WIDTH) / 2;
+        const y = screenHeight - 40;
+
+        // Background
+        ctx.save();
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(x, y, WIDTH, HEIGHT);
+
+        // Filled part
+        const expPercent = this.experience / this.experienceToNextLevel;
+        ctx.fillStyle = COLOR;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = COLOR;
+        ctx.fillRect(x, y, WIDTH * expPercent, HEIGHT);
+        
+        // Border
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, WIDTH, HEIGHT);
+
+        // Level Text
+        ctx.fillStyle = '#fff';
+        ctx.font = '12px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(`LVL ${this.level}`, screenWidth / 2, y - 5);
         ctx.restore();
     }
 }

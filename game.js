@@ -2,6 +2,7 @@ import { CONSTANTS } from './src/constants.js';
 import { Player } from './src/Player.js';
 import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
+import { ExperienceDot } from './src/ExperienceDot.js';
 
 class GameEngine {
     constructor() {
@@ -17,6 +18,7 @@ class GameEngine {
         this.player = new Player();
         this.enemies = [];
         this.projectiles = [];
+        this.experienceDots = [];
         this.stars = [];
         
         this.startTime = Date.now();
@@ -106,11 +108,27 @@ class GameEngine {
                 if (dist < enemy.size / 2 + p.size) {
                     enemy.health -= 1;
                     p.life = 0;
+                    if (enemy.health <= 0) {
+                        this.experienceDots.push(new ExperienceDot(enemy.x, enemy.y, 1)); // 1 exp for start
+                    }
                 }
             });
         });
 
         this.enemies = this.enemies.filter(enemy => enemy.health > 0);
+
+        // Experience Dots
+        this.experienceDots.forEach((dot, index) => {
+            dot.update(this.player.x, this.player.y);
+            const dx = this.player.x - dot.x;
+            const dy = this.player.y - dot.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            
+            if (dist < this.player.radius) {
+                this.player.gainExperience(dot.value);
+                this.experienceDots.splice(index, 1);
+            }
+        });
 
         // Enemy AI & Collisions
         this.enemies.forEach(enemy => {
@@ -195,6 +213,7 @@ class GameEngine {
         });
         this.ctx.globalAlpha = 1.0;
 
+        this.experienceDots.forEach(dot => dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.player.draw(this.ctx, this.centerX, this.centerY, this.width, this.height);
         this.enemies.forEach(e => e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));
         this.projectiles.forEach(p => p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY));

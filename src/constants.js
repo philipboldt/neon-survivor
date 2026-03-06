@@ -3,6 +3,7 @@ export const CONSTANTS = {
         RADIUS: 20,
         SPEED: 5,
         RANGE: 250,
+        COLLECT_RANGE: 125,
         COLOR: '#00d2ff',
         WEAPON_COOLDOWN: 1000,
         MAX_HEALTH: 15,
@@ -10,6 +11,12 @@ export const CONSTANTS = {
             WIDTH: 300,
             HEIGHT: 20,
             COLOR: '#39ff14', // Neon Green
+            BG_COLOR: '#222'
+        },
+        EXP_BAR: {
+            WIDTH: 300,
+            HEIGHT: 15,
+            COLOR: '#00d2ff', // Neon Blue
             BG_COLOR: '#222'
         }
     },
@@ -21,13 +28,18 @@ export const CONSTANTS = {
         COLOR: '#ff003c',
         SPAWN_INTERVAL: 500,
         DAMAGE: 1,
-        ATTACK_COOLDOWN: 1000 // 1 second
+        ATTACK_COOLDOWN: 1000
     },
     PROJECTILE: {
         SPEED: 7,
         SIZE: 4,
         COLOR: '#00d2ff',
         LIFE: 100
+    },
+    EXPERIENCE: {
+        SIZE: 3,
+        COLOR: '#00d2ff',
+        SPEED_MULTIPLIER: 2
     },
     WORLD: {
         STAR_COUNT: 200,
