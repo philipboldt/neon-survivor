@@ -39,7 +39,7 @@ export const CONSTANTS = {
     EXPERIENCE: {
         SIZE: 3,
         COLOR: '#00d2ff',
-        SPEED_MULTIPLIER: 2
+        SPEED_MULTIPLIER: 1.5
     },
     WORLD: {
         STAR_COUNT: 200,

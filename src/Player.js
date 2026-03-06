@@ -132,7 +132,7 @@ export class Player {
 
         // Level Text
         ctx.fillStyle = '#fff';
-        ctx.font = '12px Courier New';
+        ctx.font = '12px Orbitron';
         ctx.textAlign = 'center';
         ctx.fillText(`LVL ${this.level}`, screenWidth / 2, y - 5);
         ctx.restore();

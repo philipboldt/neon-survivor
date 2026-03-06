@@ -14,12 +14,13 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] WASD / Arrow Key input for movement
   - [x] World (enemies, grid) moves relative to the player
 - [x] Enemy Spawning & AI
-  - [x] Spawn outside current view
+  - [x] Spawn only in non-visible parts of the map (outside screen)
   - [x] Move towards player's world position
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)
 - [x] Visuals
   - [x] Neon Aesthetics (Glow effects)
   - [x] Infinite Starfield (Background dots) for movement reference
+  - [x] Spacey font ('Orbitron')
 
 - [x] Weapon System
   - [x] Player Range (visualized with dashed circle)

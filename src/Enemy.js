@@ -2,16 +2,52 @@ import { CONSTANTS } from './constants.js';
 
 export class Enemy {
     constructor(playerX, playerY, width, height) {
-        // Spawn randomly relative to the player
-        const angle = Math.random() * Math.PI * 2;
-        const distance = Math.max(width, height) / 2 + 100;
-        let spawnX = playerX + Math.cos(angle) * distance;
-        let spawnY = playerY + Math.sin(angle) * distance;
-
-        // Clamp to world boundaries
+        // Spawn outside the visible area but within world bounds
+        const margin = 50;
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+        
         const halfSize = CONSTANTS.WORLD.WORLD_SIZE / 2;
-        this.x = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnX));
-        this.y = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnY));
+        
+        let spawnX, spawnY;
+        let validSpawn = false;
+        let attempts = 0;
+
+        while (!validSpawn && attempts < 10) {
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) { // Top
+                spawnX = playerX + (Math.random() - 0.5) * (width + margin * 2);
+                spawnY = playerY - halfHeight - margin;
+            } else if (side === 1) { // Right
+                spawnX = playerX + halfWidth + margin;
+                spawnY = playerY + (Math.random() - 0.5) * (height + margin * 2);
+            } else if (side === 2) { // Bottom
+                spawnX = playerX + (Math.random() - 0.5) * (width + margin * 2);
+                spawnY = playerY + halfHeight + margin;
+            } else { // Left
+                spawnX = playerX - halfWidth - margin;
+                spawnY = playerY + (Math.random() - 0.5) * (height + margin * 2);
+            }
+
+            // Clamp and check if it's actually outside visible area after clamping
+            spawnX = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnX));
+            spawnY = Math.max(-halfSize + CONSTANTS.ENEMY.SIZE, Math.min(halfSize - CONSTANTS.ENEMY.SIZE, spawnY));
+
+            const isVisible = (
+                spawnX > playerX - halfWidth && 
+                spawnX < playerX + halfWidth && 
+                spawnY > playerY - halfHeight && 
+                spawnY < playerY + halfHeight
+            );
+
+            if (!isVisible) {
+                validSpawn = true;
+            }
+            attempts++;
+        }
+
+        this.x = spawnX;
+        this.y = spawnY;
 
         this.size = CONSTANTS.ENEMY.SIZE;
         this.health = 1;
