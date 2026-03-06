@@ -40,7 +40,7 @@ class GameEngine {
         
         this.startTime = Date.now();
         this.lastSpawnTime = 0;
-        this.lastBossSpawnTime = 0;
+        this.lastBossSpawnTime = Date.now();
         this.lastAttackTime = 0;
         this.gameRunning = false;
         this.isPaused = false;

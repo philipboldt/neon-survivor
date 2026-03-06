@@ -18,7 +18,7 @@ A functional game prototype where the player survives against waves of enemies i
 - [x] Enemy Spawning & AI
   - [x] Spawn only in non-visible parts of the map (outside screen)
   - [x] Dynamic Spawn Rate: Decreases spawn interval every 15 seconds (increases difficulty)
-  - [x] Mini Boss: Spawns every 60 seconds (10 HP, 3 damage, larger size, drops 10 EXP)
+  - [x] Mini Boss: Spawns every 45 seconds (10 HP, 3 damage, larger size, drops 10 EXP) - First boss after 45s.
   - [x] UI Notification for Mini Boss spawn (fade in/out)
   - [x] Move towards player's world position
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)

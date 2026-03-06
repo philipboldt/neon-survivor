@@ -40,7 +40,7 @@ export const CONSTANTS = {
         HEALTH: 10,
         DAMAGE: 3,
         COLOR: '#ff00ff', // Neon Purple/Magenta
-        SPAWN_INTERVAL: 60000,
+        SPAWN_INTERVAL: 45000,
         EXP_VALUE: 10
     },
     PROJECTILE: {
