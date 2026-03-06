@@ -37,21 +37,27 @@ export class SpatialGrid {
     }
 
     getNearby(x, y) {
-        const ox = x + this.halfSize;
-        const oy = y + this.halfSize;
-        const gx = Math.floor(ox / this.cellSize);
-        const gy = Math.floor(oy / this.cellSize);
-        
-        const nearby = [];
-        for (let ix = -1; ix <= 1; ix++) {
-            for (let iy = -1; iy <= 1; iy++) {
-                const key = `${gx + ix},${gy + iy}`;
-                const cell = this.cells.get(key);
+        return this.getInRegion(x - this.cellSize, y - this.cellSize, x + this.cellSize, y + this.cellSize);
+    }
+
+    /**
+     * Get all entities within a rectangular region.
+     */
+    getInRegion(x1, y1, x2, y2) {
+        const gx1 = Math.floor((x1 + this.halfSize) / this.cellSize);
+        const gy1 = Math.floor((y1 + this.halfSize) / this.cellSize);
+        const gx2 = Math.floor((x2 + this.halfSize) / this.cellSize);
+        const gy2 = Math.floor((y2 + this.halfSize) / this.cellSize);
+
+        const entities = [];
+        for (let gx = gx1; gx <= gx2; gx++) {
+            for (let gy = gy1; gy <= gy2; gy++) {
+                const cell = this.cells.get(`${gx},${gy}`);
                 if (cell) {
-                    nearby.push(...cell);
+                    entities.push(...cell);
                 }
             }
         }
-        return nearby;
+        return entities;
     }
 }

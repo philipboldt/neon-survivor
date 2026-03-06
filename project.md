@@ -64,7 +64,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Grid-based Targeting: Weapons use spatial partitioning to find nearest enemies instantly.
   - [x] Grid-based Rendering: Only enemies in nearby cells are processed for drawing.
   - [x] Squared Distance calculations (avoiding `Math.sqrt`)
-  - [x] Spatial Partitioning (Grid system for O(n) collisions)
+  - [x] Spatial Partitioning (Grid system for O(n) collisions and optimized region-based rendering/targeting)
   - [x] Frustum Culling (skip drawing off-screen entities)
 
 ## Tech Stack

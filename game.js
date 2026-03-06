@@ -307,8 +307,13 @@ class GameEngine {
             // Find enemies in range using Spatial Grid for optimization
             const rangeSq = this.player.range * this.player.range;
             
-            // Query a slightly larger area to be safe, or exact if grid allows
-            const nearbyEnemies = this.grid.getNearby(this.player.x, this.player.y);
+            // Query the exact range area
+            const nearbyEnemies = this.grid.getInRegion(
+                this.player.x - this.player.range, 
+                this.player.y - this.player.range, 
+                this.player.x + this.player.range, 
+                this.player.y + this.player.range
+            );
             
             const enemiesInRange = nearbyEnemies
                 .map(enemy => {
@@ -659,8 +664,15 @@ class GameEngine {
         }
         
         // Optimized Enemy Rendering using Spatial Grid
-        const nearbyEntities = this.grid.getNearby(this.player.x, this.player.y);
-        nearbyEntities.forEach(e => {
+        const halfV = CONSTANTS.WORLD.VIEWPORT_SIZE / 2 + 50; // Viewport half-size + margin
+        const visibleEntities = this.grid.getInRegion(
+            this.player.x - halfV, 
+            this.player.y - halfV, 
+            this.player.x + halfV, 
+            this.player.y + halfV
+        );
+        
+        visibleEntities.forEach(e => {
             const sprite = e.type === 'boss' ? this.sprites.get('boss') : this.sprites.get('enemy');
             e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
         });
