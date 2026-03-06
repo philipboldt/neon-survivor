@@ -170,7 +170,7 @@ class GameEngine {
                 const shots = Math.min(this.player.numProjectiles, enemiesInRange.length);
                 for (let i = 0; i < shots; i++) {
                     const target = enemiesInRange[i].enemy;
-                    this.projectiles.push(new Projectile(this.player.x, this.player.y, target.x, target.y));
+                    this.projectiles.push(new Projectile(this.player.x, this.player.y, target.x, target.y, this.player.range));
                 }
                 this.lastAttackTime = now;
             }
@@ -187,7 +187,7 @@ class GameEngine {
         // Projectiles
         this.projectiles.forEach((p, index) => {
             p.update();
-            if (p.life <= 0) {
+            if (p.dead) {
                 this.projectiles.splice(index, 1);
                 return;
             }
@@ -197,7 +197,7 @@ class GameEngine {
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < enemy.size / 2 + p.size) {
                     enemy.health -= this.player.projectileDamage;
-                    p.life = 0;
+                    p.dead = true;
                     if (enemy.health <= 0) {
                         if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
                             this.healDots.push(new HealDot(enemy.x, enemy.y));
