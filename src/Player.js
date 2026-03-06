@@ -20,6 +20,7 @@ export class Player {
         this.numProjectiles = 1;
         this.projectileDamage = 1;
         this.numOrbitals = 0;
+        this.gold = 0;
     }
 
     update(keys) {

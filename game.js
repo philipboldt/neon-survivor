@@ -4,6 +4,9 @@ import { Enemy } from './src/Enemy.js';
 import { Projectile } from './src/Projectile.js';
 import { ExperienceDot } from './src/ExperienceDot.js';
 import { HealDot } from './src/HealDot.js';
+import { MagnetDot } from './src/MagnetDot.js';
+import { GoldDot } from './src/GoldDot.js';
+import { Box } from './src/Box.js';
 import { UIManager } from './src/UIManager.js';
 import { SpriteManager } from './src/SpriteManager.js';
 import { SpatialGrid } from './src/SpatialGrid.js';
@@ -34,9 +37,12 @@ class GameEngine {
 
     resetGameState() {
         this.enemies = [];
+        this.boxes = [];
         this.projectiles = [];
         this.experienceDots = [];
         this.healDots = [];
+        this.magnetDots = [];
+        this.goldDots = [];
         this.stars = [];
         
         this.startTime = Date.now();
@@ -202,6 +208,40 @@ class GameEngine {
             ctx.arc(cx, cy, CONSTANTS.ORBITAL.SIZE, 0, Math.PI * 2);
             ctx.fill();
         });
+
+        // Box Sprite
+        const boxSize = (CONSTANTS.BOX.SIZE + padding) * 2;
+        this.sprites.preRender('box', boxSize, boxSize, (ctx, cx, cy) => {
+            ctx.strokeStyle = CONSTANTS.BOX.COLOR;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = CONSTANTS.BOX.GLOW;
+            ctx.strokeRect(cx - CONSTANTS.BOX.SIZE / 2, cy - CONSTANTS.BOX.SIZE / 2, CONSTANTS.BOX.SIZE, CONSTANTS.BOX.SIZE);
+            // Inner detail
+            ctx.strokeRect(cx - CONSTANTS.BOX.SIZE / 4, cy - CONSTANTS.BOX.SIZE / 4, CONSTANTS.BOX.SIZE / 2, CONSTANTS.BOX.SIZE / 2);
+        });
+
+        // Magnet Sprite
+        const mSize = (CONSTANTS.MAGNET.SIZE + padding) * 2;
+        this.sprites.preRender('magnet', mSize, mSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.MAGNET.COLOR;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = CONSTANTS.MAGNET.GLOW;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.MAGNET.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Gold Sprite
+        const gSize = (CONSTANTS.GOLD.SIZE + padding) * 2;
+        this.sprites.preRender('gold', gSize, gSize, (ctx, cx, cy) => {
+            ctx.fillStyle = CONSTANTS.GOLD.COLOR;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = CONSTANTS.GOLD.GLOW;
+            ctx.beginPath();
+            ctx.arc(cx, cy, CONSTANTS.GOLD.SIZE, 0, Math.PI * 2);
+            ctx.fill();
+        });
     }
 
     applyUpgrade(type) {
@@ -288,6 +328,12 @@ class GameEngine {
             this.enemies.push(new Enemy(this.player.x, this.player.y, vSize, vSize, 'boss'));
             this.lastBossSpawnTime = now;
             this.ui.showBossNotification();
+
+            // Spawn 4 boxes in each quarter
+            this.boxes.push(new Box(-1500, -1500));
+            this.boxes.push(new Box(1500, -1500));
+            this.boxes.push(new Box(-1500, 1500));
+            this.boxes.push(new Box(1500, 1500));
         }
 
         const currentInterval = Math.max(100, CONSTANTS.ENEMY.SPAWN_INTERVAL - Math.floor(survivalTime / 15) * 50);
@@ -416,6 +462,7 @@ class GameEngine {
         // Spatial Grid Update
         this.grid.clear();
         this.enemies.forEach(e => this.grid.insert(e));
+        this.boxes.forEach(b => this.grid.insert(b));
 
         // Projectiles
         this.projectiles.forEach((p, index) => {
@@ -431,25 +478,33 @@ class GameEngine {
                 return;
             }
             
-            // Optimization: Only check nearby enemies
-            const nearbyEnemies = this.grid.getNearby(p.x, p.y);
-            nearbyEnemies.forEach(enemy => {
-                const dx = p.x - enemy.x;
-                const dy = p.y - enemy.y;
+            // Optimization: Only check nearby entities
+            const nearbyEntities = this.grid.getNearby(p.x, p.y);
+            nearbyEntities.forEach(entity => {
+                const dx = p.x - entity.x;
+                const dy = p.y - entity.y;
                 const distSq = dx * dx + dy * dy;
-                const minDist = (enemy.size / 2 + p.size);
+                const minDist = (entity.size / 2 + p.size);
                 if (distSq < minDist * minDist) {
-                    enemy.health -= this.player.projectileDamage;
+                    entity.health -= this.player.projectileDamage;
                     p.dead = true;
-                    if (enemy.health <= 0) {
-                        if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
-                            this.healDots.push(new HealDot(enemy.x, enemy.y));
+                    if (entity.health <= 0) {
+                        if (entity instanceof Box) {
+                            if (Math.random() < 0.5) {
+                                this.magnetDots.push(new MagnetDot(entity.x, entity.y));
+                            } else {
+                                this.goldDots.push(new GoldDot(entity.x, entity.y));
+                            }
                         } else {
-                            const dots = enemy.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
-                            for (let i = 0; i < dots; i++) {
-                                const ox = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                const oy = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
-                                this.experienceDots.push(new ExperienceDot(enemy.x + ox, enemy.y + oy, 1));
+                            if (Math.random() < CONSTANTS.EXPERIENCE.HEAL_DROP_CHANCE) {
+                                this.healDots.push(new HealDot(entity.x, entity.y));
+                            } else {
+                                const dots = entity.type === 'boss' ? CONSTANTS.MINI_BOSS.EXP_VALUE : 1;
+                                for (let i = 0; i < dots; i++) {
+                                    const ox = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                    const oy = (Math.random() - 0.5) * CONSTANTS.EXPERIENCE.DROP_SPREAD;
+                                    this.experienceDots.push(new ExperienceDot(entity.x + ox, entity.y + oy, 1));
+                                }
                             }
                         }
                     }
@@ -458,6 +513,7 @@ class GameEngine {
         });
 
         this.enemies = this.enemies.filter(enemy => enemy.health > 0);
+        this.boxes = this.boxes.filter(box => box.health > 0);
 
         // Experience Dots
         this.experienceDots.forEach((dot, index) => {
@@ -474,6 +530,34 @@ class GameEngine {
                     this.ui.showUpgradeScreen();
                 }
                 this.experienceDots.splice(index, 1);
+            }
+        });
+
+        // Magnet Dots
+        this.magnetDots.forEach((dot, index) => {
+            dot.update(this.player.x, this.player.y);
+            const dx = this.player.x - dot.x;
+            const dy = this.player.y - dot.y;
+            const distSq = dx * dx + dy * dy;
+            
+            if (distSq < this.player.radius * this.player.radius) {
+                // Trigger Magnet: All EXP dots start following
+                this.experienceDots.forEach(exp => exp.isFollowing = true);
+                this.magnetDots.splice(index, 1);
+            }
+        });
+
+        // Gold Dots
+        this.goldDots.forEach((dot, index) => {
+            dot.update(this.player.x, this.player.y);
+            const dx = this.player.x - dot.x;
+            const dy = this.player.y - dot.y;
+            const distSq = dx * dx + dy * dy;
+            
+            if (distSq < this.player.radius * this.player.radius) {
+                this.player.gold++;
+                this.ui.updateGold(this.player.gold);
+                this.goldDots.splice(index, 1);
             }
         });
 
@@ -663,7 +747,7 @@ class GameEngine {
             }
         }
         
-        // Optimized Enemy Rendering using Spatial Grid
+        // Optimized Enemy/Box Rendering using Spatial Grid
         const halfV = CONSTANTS.WORLD.VIEWPORT_SIZE / 2 + 50; // Viewport half-size + margin
         const visibleEntities = this.grid.getInRegion(
             this.player.x - halfV, 
@@ -673,10 +757,22 @@ class GameEngine {
         );
         
         visibleEntities.forEach(e => {
-            const sprite = e.type === 'boss' ? this.sprites.get('boss') : this.sprites.get('enemy');
+            let sprite;
+            if (e.type === 'boss') sprite = this.sprites.get('boss');
+            else if (e instanceof Box) sprite = this.sprites.get('box');
+            else sprite = this.sprites.get('enemy');
+            
             e.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, sprite);
         });
         
+        // Render Dots
+        this.magnetDots.forEach(dot => {
+            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('magnet'));
+        });
+        this.goldDots.forEach(dot => {
+            if (isVisible(dot)) dot.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('gold'));
+        });
+
         this.projectiles.forEach(p => {
             if (isVisible(p)) p.draw(this.ctx, this.player.x, this.player.y, this.centerX, this.centerY, this.sprites.get('projectile'));
         });

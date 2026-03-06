@@ -18,7 +18,8 @@ export class UIManager {
             saveNameBtn: document.getElementById('save-name'),
             charEls: document.querySelectorAll('.arcade-input .char'),
             touchArrows: document.querySelectorAll('.touch-arrow'),
-            bossNotification: document.getElementById('boss-notification')
+            bossNotification: document.getElementById('boss-notification'),
+            gold: document.getElementById('gold')
         };
 
         this.nameInputActive = false;
@@ -161,6 +162,12 @@ export class UIManager {
 
     updateTime(seconds) {
         this.els.time.textContent = seconds;
+    }
+
+    updateGold(amount) {
+        if (this.els.gold) {
+            this.els.gold.textContent = amount;
+        }
     }
 
     showBossNotification() {

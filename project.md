@@ -20,6 +20,7 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Dynamic Spawn Rate: Decreases spawn interval every 15 seconds (increases difficulty)
   - [x] Mini Boss: Spawns every 45 seconds (10 HP, 3 damage, larger size, drops 10 EXP) - First boss after 45s.
   - [x] UI Notification for Mini Boss spawn (fade in/out)
+  - [x] Boxes: 4 stationary neon brown boxes spawn in each quarter with mini boss. (3 HP, drop Magnet or Gold)
   - [x] Move towards player's world position
   - [x] Collision resolution (Enemy vs Enemy, Enemy vs Player)
 - [x] Visuals
@@ -45,6 +46,8 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Melee damage from enemies (1 damage per second)
 - [x] Experience & Leveling
   - [x] Enemies drop neon blue experience dots on death
+  - [x] Magnet Dot: Collected from Boxes, triggers immediate collection of ALL EXP dots on map.
+  - [x] Gold Dot: Collected from Boxes, increases player gold counter.
   - [x] 5% chance for enemies to drop a neon green heal dot (heals player fully)
   - [x] Player has a collection range (visualized with dark blue circle)
   - [x] Experience/Heal dots fly to player when in range
@@ -53,11 +56,14 @@ A functional game prototype where the player survives against waves of enemies i
   - [x] Choice-based upgrade system (+1 Attack, +1 Damage, Circling Ball)
   - [x] Circling Ball Upgrade: Orbitals rotate at 3/4 range, dealing 1 damage on contact. Multiple upgrades add more balls (equally distributed).
 - [x] Game Flow & UI
+  - [x] Neon high-contrast aesthetic
+  - [x] HUD showing HP, Experience, Time, and Gold
   - [x] Start Screen with Highscores
   - [x] Pause functionality (SPACE key)
   - [x] Game Over screen with stats and restart
   - [x] Highscore logic (Local Storage) with 3-letter name entry
   - [x] Arcade-style character selection UI for highscores
+  - [x] Mini Boss Spawn Notification (fade in/out)
 - [x] Performance Optimizations
   - [x] Sprite Pre-rendering (offscreen canvases for neon glow)
   - [x] Tiled Starfield Pre-rendering: Stars are drawn once to offscreen tiles instead of 800+ arc calls per frame.

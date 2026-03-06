@@ -45,6 +45,12 @@ export const CONSTANTS = {
         EXP_VALUE: 10,
         NOTIFICATION_DURATION: 3000
     },
+    BOX: {
+        SIZE: 30,
+        HEALTH: 3,
+        COLOR: '#8B4513',
+        GLOW: '#CD853F'
+    },
     PROJECTILE: {
         SPEED: 7,
         SIZE: 4,
@@ -64,6 +70,16 @@ export const CONSTANTS = {
         SPEED_MULTIPLIER: 1.5,
         HEAL_DROP_CHANCE: 0.05,
         DROP_SPREAD: 30
+    },
+    MAGNET: {
+        SIZE: 5,
+        COLOR: '#CD853F',
+        GLOW: '#8B4513'
+    },
+    GOLD: {
+        SIZE: 5,
+        COLOR: '#FFD700',
+        GLOW: '#FFFF00'
     },
     HEAL: {
         SIZE: 4,
